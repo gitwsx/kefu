@@ -1,6 +1,6 @@
 export default {
   tip: '提示',
-  title: '聚水潭接口平台',
+  title: '管易接口平台',
   logoutTip: '退出系统, 是否继续?',
   submitText: '确定',
   cancelText: '取消',

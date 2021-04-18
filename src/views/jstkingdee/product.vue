@@ -443,10 +443,10 @@
         padding: 0;
     }
     .el-col{
-        margin-bottom: 0;
+        margin-bottom: 10px;
     }
     .avue-form__menu--right{
-        margin-top: -43px;
+        /*margin-top: -43px;*/
         width: 300px;
         float: right;
     }

@@ -13,9 +13,9 @@ if (env.NODE_ENV == 'development') {
     baseUrl = ``; //测试环境地址
 }
 
-//let domainUrl = "http://106.14.65.8:8099/jst_toKingdee/jst"; //本地服务器
-let domainUrl = 'http://183.129.181.42:8086/jst_toKingdee/jst'; //线上
-
+//let domainUrl = "http://106.14.65.8:8085/jst"; //本地服务器
+//let domainUrl = "http://192.168.5.15:8082/mrk/jst"; //本地服务器
+let domainUrl = "http://124.71.173.115:8082/mrk/jst";
 export {
     baseUrl,
     domainUrl,

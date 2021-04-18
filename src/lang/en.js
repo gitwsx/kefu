@@ -1,5 +1,5 @@
 export default {
-  title: '聚水潭接口平台',
+  title: '管易接口平台',
   tip: 'tip',
   logoutTip: 'Exit the system, do you want to continue?',
   submitText: 'submit',

@@ -111,54 +111,32 @@
                                 trigger: "blur"
                             }]
                         },
-                        {
-                            label: "对应销售组织编码",
-                            prop: "fSaleOrgNumber",
-                            row: true,
-                            width:150,
-                            span:16,
-                            rules: [{
-                                required: true,
-                                message: "请输入对应销售组织编码",
-                                trigger: "blur"
-                            }]
-                        },
-                        {
-                            label: "对应销售组织名称",
-                            prop: "fSaleOrgName",
-                            row: true,
-                            width:150,
-                            minRows: 8,
-                            span:16,
-                            overHidden: true,
-                            rules: [{
-                                required: true,
-                                message: "请输入对应销售组织名称",
-                                trigger: "blur"
-                            }]
-                        },
-                        {
-                            label: "状态",
-                            prop: "fStatus",
-                            row: true,
-                            type:'select',
-                            width:150,
-                            span:16,
-                            dicData:[
-                                {
-                                    id:0,
-                                    value:"使用"
-                                },{
-                                    id:2,
-                                    value:"未使用"
-                                }
-                            ],
-                            rules: [{
-                                required: true,
-                                message: "请输入状态",
-                                trigger: "blur"
-                            }]
-                        }
+                        // {
+                        //     label: "对应销售组织编码",
+                        //     prop: "fSaleOrgNumber",
+                        //     row: true,
+                        //     width:150,
+                        //     span:16,
+                        //     rules: [{
+                        //         required: true,
+                        //         message: "请输入对应销售组织编码",
+                        //         trigger: "blur"
+                        //     }]
+                        // },
+                        // {
+                        //     label: "对应销售组织名称",
+                        //     prop: "fSaleOrgName",
+                        //     row: true,
+                        //     width:150,
+                        //     minRows: 8,
+                        //     span:16,
+                        //     overHidden: true,
+                        //     rules: [{
+                        //         required: true,
+                        //         message: "请输入对应销售组织名称",
+                        //         trigger: "blur"
+                        //     }]
+                        // }
                     ]
                 },
                 btnnum:0, // 总共多少页
@@ -174,72 +152,41 @@
             };
         },
         created(){
-            this.getList();
+            //this.getList();
         },
         methods: {
-            getList(){  //获取数据
+            getList(page,pageSize,bianMa,name){  //获取数据
                 this.data = [];
+                let obj = {
+                    pageNum:page,
+                    pageSize:pageSize,
+                    number:bianMa,
+                    name:name
+                }
                 let dataArr = request({
-                    url:domainUrl + '/findShopMapping?data=find',
-                    method:'get'
+                    url:domainUrl + '/findShopMapping',
+                    data:obj,
+                    method:'POST'
                 })
                 dataArr.then(res => {
-                    this.arrData = res.data;
-                    this.page.total = res.data.length;
-                    if(this.page.total>this.page.pageSize){
-                        for (var i = 0;i<20;i++){
-                            this.data.push(this.arrData[i])
-                        }
-                    }else {
-                        for (var i = 0;i<this.arrData.length;i++){
-                            this.data.push(this.arrData[i])
-                        }
-                    }
-
-                    for (var i = 0;i<this.arrData.length;i++){
-                        if(this.arrData[i].fStatus){
-                            this.arrData[i].fStatus ='使用'
-                        }else {
-                            this.arrData[i].fStatus ='未使用'
-                        }
-                    }
-                    for (var i = 0;i<this.data.length;i++){
-                        if(this.data[i].fStatus){
-                            this.data[i].fStatus ='使用'
-                        }else {
-                            this.data[i].fStatus ='未使用'
-                        }
-                    }
-
-                    this.btnnum = Math.ceil(this.page.total/this.page.pageSize);
+                    this.page.total = res.data.total;
+                    this.page.pageSize = res.data.pageSize;
+                    this.data = res.data.list;
                 })
             },
             //查询
             submit(){
-                this.data = [];
-                if(this.inputBh !="" && this.inputMc == ""){
-                    for (var i=0;i<this.arrData.length;i++){
-                        if(this.inputBh == this.arrData[i].fDsptDpNumber){
-                            this.data.push(this.arrData[i])
-                        }
+                this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc)
+            },
+            //查询
+            fuzzyQuery(list, keyWord) {
+                var arr = [];
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].fDsptDpName.indexOf(keyWord) >= 0) {
+                        arr.push(list[i]);
                     }
-                }else if(this.inputBh !="" && this.inputMc != ""){
-                    for (var i=0;i<this.arrData.length;i++){
-                        if(this.inputBh == this.arrData[i].fDsptDpNumber && this.inputMcr == this.arrData[i].fDsName){
-                            this.data.push(this.arrData[i])
-                        }
-                    }
-                }else if(this.inputBh =="" && this.inputMc != ""){
-                    for (var i=0;i<this.arrData.length;i++){
-                        if(this.inputMc == this.arrData[i].fDsName){
-                            this.data.push(this.arrData[i])
-                        }
-                    }
-                }else{
-                    this.data =  this.arrData;
                 }
-
-                this.page.total = this.data.length;
+                return arr;
             },
             //新增
             rowSave(form,done){
@@ -296,45 +243,21 @@
                 this.inputMc = "";
             },
             onLoad(page){
-                this.data = [];
-                let maxPage = Math.ceil(page.total/page.pageSize);
-                if(this.arrData.length != 0){
-                    if(page.currentPage>this.endnum){
-                        this.endnum = page.currentPage;
-                        this.startnum = page.currentPage -1;
-                        if(this.endnum == maxPage){
-                            for (var i = this.startnum*page.pageSize;i<this.arrData.length;i++){
-                                this.data.push(this.arrData[i])
-                            }
-                        }else {
-                            for (var i = this.startnum*page.pageSize;i<this.endnum*page.pageSize;i++){
-                                this.data.push(this.arrData[i])
-                            }
-                        }
-                    }else {
-                        this.endnum = page.currentPage;
-                        this.startnum = page.currentPage -1;
-                        for (var i = this.startnum*page.pageSize;i<this.endnum*page.pageSize;i++){
-                            this.data.push(this.arrData[i])
-                        }
-                    }
-                }
+                this.getList(page.currentPage,page.pageSize,this.inputBh,this.inputMc)
             },
             handleExcel(){
-                if(this.arrData.length == 0){
+                if(this.data.length == 0){
                     this.$message.success('请选择需要导出的数据');
-                }else if(this.page.total > 5000){
-                    this.$message.success('您所导出的数据太大，请选择数据小于5000导出!');
                 }else {
                     let opt = {
                         title: '电商平台',
                         column: this.option.column,
-                        data: this.arrData
+                        data: this.data
                     }
                     this.$export.excel({
                         title: opt.title || new Date().getTime(),
                         columns: opt.column,
-                        data: opt.arrData
+                        data: opt.data
                     });
                 }
             }
@@ -367,10 +290,10 @@
         padding: 0;
     }
     .el-col{
-        margin-bottom: 0;
+        margin-bottom: 10px;
     }
     .avue-form__menu--right{
-        margin-top: -43px;
+        /*margin-top: -43px;*/
         width: 300px;
         float: right;
     }

@@ -103,7 +103,6 @@ export default {
   },
   methods: {
       submit(form,done){
-          //console.log(LoginByUsername,4444444444444)
           if(form.xPassWord != form.quePassWord){
               this.$message.success('您输入的确认密码与新密码不对 ！');
           }else {
@@ -112,6 +111,7 @@ export default {
                   method:'post',
                   data:{
                       userid:"admin",
+                      oldpassword:form.yPassWord, //原密码
                       password:form.xPassWord
                   }
               })
@@ -119,6 +119,8 @@ export default {
                   if (res.data){
                       this.$message.success("修改密码成功!")
                       this.error();
+                  }else {
+                      this.$message.success("您输入的原密码不对，请重新输入!")
                   }
               })
           }
