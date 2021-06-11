@@ -14,7 +14,7 @@
       <!--</div>-->
       <div class="login-border">
         <div class="login-border-top">
-          <p>管易接口平台</p>
+          <p>服务工单平台</p>
         </div>
         <div class="login-main">
           <!--<div class="login-main-left">-->

@@ -5,7 +5,7 @@ export default {
   title: "Avue",
   logo: "A",
   key: 'avue',//配置主键,目前用于存储
-  indexTitle: '管易接口平台',
+  indexTitle: '服务工单平台',
   lockPage: '/lock',
   tokenTime: 6000,
   //http的status默认放行不才用统一处理的,

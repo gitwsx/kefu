@@ -89,7 +89,7 @@ export default {
     };
     return {
       loginForm: {
-        username: "admin",
+        username: "",
         password: "",
         code: "",
         redomStr: ""
@@ -132,7 +132,7 @@ export default {
       this.code.type == "text"
         ? (this.code.value = randomLenNum(this.code.len))
         : (this.code.src = `${this.codeUrl}/${this.loginForm.redomStr}`);
-      //this.loginForm.code = this.code.value;
+      //this.loginForm.code = this.code.value; //默认显示验证码
     },
     showPassword() {
       this.passwordType == ""
@@ -150,22 +150,21 @@ export default {
                 }
             })
             login.then(res => {
-                if(!res.data){
-                    this.$message.success('您输入的账号或者密码有误');
+                if(!res.data.success){
+                    this.$message.error(res.data.msg);
                 }else {
+                    let obj = JSON.stringify(res.data);
+                    this.$cookie.set('token',obj,360);
                     this.$refs.loginForm.validate(valid => {
                         if (valid) {
                             this.$store.dispatch("LoginByUsername", this.loginForm).then(() => {
                                 this.$router.push({ path: this.tagWel.value});
-                                //this.$router.push({path: '/wel/index'});
                             });
                         }
                     });
                 }
             })
         }
-
-
     }
   }
 };

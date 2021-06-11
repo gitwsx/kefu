@@ -1,5 +1,5 @@
 import Mock from 'mockjs'
-
+import { loginByUsername, getUserInfo, getMenu, getTopMenu, logout, refeshToken } from '@/api/user'
 const top = [
   {
     label: "首页",
@@ -12,73 +12,47 @@ const top = [
   }
 ]
 const first = [
-    // {
-    //     label: "出货异常明细表",
-    //     path: '/jstSalOut',
-    //     component: 'views/jstkingdee/jstSalOutBill',
-    //     icon: 'icon-caidan',
-    //     children: []
-    // }, {
-    //     label: "出货汇总核对表",
-    //     path: '/jstInvoiceBill',
-    //     component: 'views/jstkingdee/jstInvoiceBill',
-    //     icon: 'icon-caidan',
-    //     children: []
-    // },
-    // {
-    //     label: "退货异常明细表",
-    //     path: '/jstCheckRpt',
-    //     component: 'views/jstkingdee/jstCheckRpt',
-    //     icon: 'icon-caidan',
-    //     children: []
-    // },{
-    //     label: "退货汇总核对表",
-    //     path: '/jstOutBill',
-    //     component: 'views/jstkingdee/jstOutBill',
-    //     icon: 'icon-caidan',
-    //     children: []
-    // },
     {
-        label:'电商平台',
-        path:"/electricity",
-        component:"views/jstkingdee/electricity",
-        icon: 'icon-caidan',
-        children: []
-    },{
-        label:'仓库管理',
-        path:'/warehouse',
-        component:'views/jstkingdee/warehouse',
+        children: [],
+        component: "views/jstkingdee/history",
+        icon: "icon-caidan",
+        label: "未完成工单",
+        path: "/history"
+    },
+    {
+        label:'已完成工单',
+        path:'/workOrder',
+        component:'views/jstkingdee/workOrder',
         icon:'icon-caidan',
         children:[]
-    },{
-        label:'供应商管理',
-        path:'/supplier',
-        component:'views/jstkingdee/supplier',
-        icon:'icon-caidan',
-        children:[]
+    },
+    {
+        label: '工单信息',
+        path: '/addWork',
+        component:  'views/jstkingdee/addWork',
+        icon: "icon-caidan",
+        id: 2,
+        children: [],
     }
     // {
-    //     label:'商品信息',
-    //     path:"/product",
-    //     component:"views/jstkingdee/product",
+    //     label:'新增工单',
+    //     path:"/addWork",
+    //     component:"@/views/jstkingdee/addWork",
     //     icon: 'icon-caidan',
     //     children: []
+    // },
+    // {
+    //     label:'客户账号管理',
+    //     path:'/clientAccount',
+    //     component:'views/jstkingdee/warehouse',
+    //     icon:'icon-caidan',
+    //     children:[]
     // }
 ]
 const second = []
-const third = [{
-  label: "测试页面",
-  path: '/test',
-  component: 'views/test',
-  icon: 'icon-caidan',
-  meta: {
-    i18n: 'test',
-  },
-  children: []
-}]
-export default ({ mock }) => {
-  if (!mock) return;
-  let menu = [first, second, third];
+const third = []
+export default ({ mock }) => {  if (!mock) return;
+    let menu = [first, second, third];
   Mock.mock('/user/getMenu', 'get', (res) => {
     let body = JSON.parse(res.body);
     return {

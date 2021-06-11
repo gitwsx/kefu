@@ -3,8 +3,10 @@ import { setStore, getStore } from '@/util/store'
 import { isURL, validatenull } from '@/util/validate'
 import { encryption, deepClone } from '@/util/util'
 import webiste from '@/config/website'
+import request from '@/router/axios';
+import { domainUrl } from '@/config/env';
 import { loginByUsername, getUserInfo, getMenu, getTopMenu, logout, refeshToken } from '@/api/user'
-
+import Cookie from 'js-cookie'
 
 function addPath (ele, first) {
   const menu = webiste.menu;
@@ -33,6 +35,7 @@ function addPath (ele, first) {
   }
 
 }
+let useranme = "";
 const user = {
   state: {
     userInfo: {},
@@ -43,6 +46,7 @@ const user = {
     menuAll: getStore({ name: 'menuAll' }) || [],
     token: getStore({ name: 'token' }) || '',
   },
+
   actions: {
     //根据用户名登录
     LoginByUsername ({ commit }, userInfo) {
@@ -52,6 +56,7 @@ const user = {
         key: 'avue',
         param: ['useranme', 'password']
       });
+        //useranme = userInfo.username;
       return new Promise((resolve) => {
         loginByUsername(user.username, user.password, userInfo.code, userInfo.redomStr).then(res => {
           const data = res.data.data;
@@ -77,7 +82,12 @@ const user = {
     GetUserInfo ({ commit }) {
       return new Promise((resolve, reject) => {
         getUserInfo().then((res) => {
-          const data = res.data.data;
+          let data = res.data.data;
+            if(Cookie.get('token') != undefined){
+                const obj = JSON.parse(Cookie.get('token'))
+                data.userInfo.username = obj.name;
+                data.roles = obj.name;
+            }
           commit('SET_USERIFNO', data.userInfo);
           commit('SET_ROLES', data.roles);
           commit('SET_PERMISSION', data.permission)
@@ -140,17 +150,47 @@ const user = {
       })
     },
     //获取系统菜单
+
     GetMenu ({ commit }, parentId) {
+        // return new Promise(resolve => {
+        //     getMenu(parentId).then((res) => {
+        //         const data = res.data.data;
+        //         let menu = deepClone(data);
+        //         menu.forEach(ele => {
+        //             addPath(ele, true);
+        //         })
+        //         commit('SET_MENU', menu)
+        //         resolve(menu)
+        //     })
+        // })
+      let name = "";
+        if(Cookie.get('token') != undefined){
+            const obj = JSON.parse(Cookie.get('token'))
+            useranme = obj.name;
+        }
       return new Promise(resolve => {
-        getMenu(parentId).then((res) => {
-          const data = res.data.data;
-          let menu = deepClone(data);
-          menu.forEach(ele => {
-            addPath(ele, true);
+          getMenu(parentId).then((res) => {
+              let login = request({
+                  url:domainUrl + '/getMenu?uname=' + useranme,
+                  method:'get'
+              })
+              login.then(ress => {
+                  const data = ress.data.datas;
+                  let menu = deepClone(data);
+                  menu.forEach(ele => {
+                      addPath(ele, true);
+                  })
+                  commit('SET_MENU', menu)
+                  resolve(menu)
+              })
+              //const data = res.data.data;
+
+
           })
-          commit('SET_MENU', menu)
-          resolve(menu)
-        })
+          getUserInfo().then((res) =>{
+           name = res.data.data.userInfo.username;
+          })
+
       })
     },
   },

@@ -99,32 +99,37 @@ export default {
     }
   },
   created () {
-
+      this.obj = JSON.parse(this.$cookie.get("token"));
   },
   methods: {
       submit(form,done){
-          if(form.xPassWord != form.quePassWord){
-              this.$message.success('您输入的确认密码与新密码不对 ！');
-          }else {
-              let subForm = request({
-                  url:domainUrl + '/updateUser',
-                  method:'post',
-                  data:{
-                      userid:"admin",
-                      oldpassword:form.yPassWord, //原密码
-                      password:form.xPassWord
-                  }
-              })
-              subForm.then(res =>{
-                  if (res.data){
-                      this.$message.success("修改密码成功!")
-                      this.error();
-                  }else {
-                      this.$message.success("您输入的原密码不对，请重新输入!")
-                  }
-              })
-          }
           done();
+          if(form.xPassWord != form.quePassWord){
+              this.$message.error('您输入的确认密码与新密码不对 ！');
+              return;
+          }
+          if(form.xPassWord.length<6){
+              this.$message.error('您输入的确认小于6位！');
+              return;
+          }
+          let subForm = request({
+              url:domainUrl + '/updateUserPassword',
+              method:'post',
+              data:{
+                  userid:this.obj.name,
+                  oldpassword:form.yPassWord, //原密码
+                  password:form.xPassWord
+              }
+          })
+          subForm.then(res =>{
+              console.log(res)
+              if (res.data){
+                  this.$message.success("修改成功")
+                  this.error();
+              }else {
+                  this.$message.error("原密码不正确!")
+              }
+          })
       },
       error(form){
 

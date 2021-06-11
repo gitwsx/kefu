@@ -1,5 +1,5 @@
 export default {
-  title: '管易接口平台',
+  title: '服务工单平台',
   tip: 'tip',
   logoutTip: 'Exit the system, do you want to continue?',
   submitText: 'submit',
