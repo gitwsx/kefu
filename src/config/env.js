@@ -15,10 +15,10 @@ if (env.NODE_ENV == 'development') {
 
 // let domainUrl = "https://106.14.65.8:8085/lakj"; //本地服务器
 // let url = "https://106.14.65.8:8085/"; //本地服务器
-let domainUrl = "http://121.43.231.237:8085/lakj"; //本地服务器
-let url = "http://121.43.231.237:8085/";
-// let domainUrl = "http://192.168.5.15:8085/lakj"; //本地服务器
-// let url = "http://192.168.5.15:8085";
+// let domainUrl = "http://121.43.231.237:8085/lakj"; //本地服务器
+// let url = "http://121.43.231.237:8085/";
+let domainUrl = "http://192.168.5.15:8085/lakj"; //本地服务器
+let url = "http://192.168.5.15:8085";
 
 export {
     baseUrl,

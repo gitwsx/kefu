@@ -29,6 +29,8 @@ Vue.prototype.model = model;
 // 配置cookie
 import cookie from 'vue-cookie'
 Vue.prototype.$cookie = cookie;
+Vue.use(cookie)
+
 
 import VueClipboard from 'vue-clipboard2'
 Vue.use(VueClipboard)

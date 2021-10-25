@@ -1,46 +1,40 @@
 <template>
     <basic-container>
+        <!--<h3>未完成工单</h3>-->
         <el-row :span="24">
-            <el-col :span="5">
-                <div class="sqTop">标题:</div>
-                <avue-input class="input" v-model="inputBh" placeholder="请输入标题" ></avue-input>
-            </el-col>
-            <el-col :span="5">
-                <div class="sqTop">客户单位:</div>
-                <avue-input v-model="inputMc" placeholder="请输入客户单位" ></avue-input>
-            </el-col>
             <el-col :span="10">
                 <div class="sqTop">查询日期:</div>
                 <avue-date :span="4" v-model="begTime" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="请选择日期"></avue-date>
                 <span style="float: left;line-height: 40px;margin: 0 10px">至</span>
                 <avue-date :span="4" v-model="endTime" format="yyyy-MM-dd" value-format="yyyy-MM-dd" placeholder="请选择日期"></avue-date>
             </el-col>
+			<el-col :span="2">
+				<div class="userName" @click="userAdd">
+				    <i class="iconfont iconbumenguanli"></i>
+				</div>
+			</el-col>
+			<el-col :span="6">
+				<button class="topBtn" @click="lastclick">上一周</button>
+				<button class="topBtn" @click="monday">本周</button>
+				<button class="topBtn" @click="nextclick">下一周</button>
+			</el-col>
             <el-col :span="4">
                 <div class="btn-right" style="margin-top: 3px;float: right;">
                     <button style="margin-right: 5px;padding: 6px 15px" @click="submitcx">查询</button>
                     <button @click="error" style="padding: 6px 15px">清空</button>
                 </div>
             </el-col>
+
             <el-col :span="24">
                 <div class="btn-right">
-                    <button @click="subSucc(1)">新增工单</button>
-                    <button style="margin-right: 10px" @click="subSucc(4)">修改工单</button>
-                    <button v-if="this.obj.roleid != 3" style="margin-right: 10px" @click="subSucc(2)">处理工单</button>
-                    <button style="margin-right: 10px" @click="subSucc(3)">查看工单</button>
-                    <button style="margin-right: 10px" @click="toDelete">删除工单</button>
-                    <button v-if="obj.roleid == 1" style="margin-right: 10px;" @click="zhiding">分配工单</button>
-                    <button v-if="obj.roleid == 1" style="margin-right: 10px;" @click="cuiban">催办</button>
-                </div>
-                <div class="userName" @click="userAdd">
-                    <i class="iconfont iconbumenguanli"></i>
-                </div>
+                    <button @click="subSucc(1)">新增</button>
+				<!-- 	<button style="margin-right: 10px" @click="subSucc(4)">修改</button> -->
+				</div>
             </el-col>
         </el-row>
-        <div>
-            <avue-crud ref="crud" :option="option" :page.sync="page" :data="data" @on-load="onLoad" @row-click="handleRowClick" @selection-change="selectionChange" :cell-style="cellStyle"></avue-crud>
-        </div>
+		 <avue-crud ref="crud" :option="option" :page.sync="page" :data="data" :span-method="objectSpanMethod" @on-load="onLoad" @selection-change="handleSelectionChange" @row-del="deleteData" :cell-style="cellStyle" @row-dblclick="handleRowDBLClick"></avue-crud>	
         <!--指定分配人-->
-        <div class="popUps" v-if="isZhiding">
+      <div class="popUps" v-if="isZhiding">
             <div class="fuzhi">
                 <div class="fuzhi-top">
                     <i class="iconfont iconguanbi" @click="toZd"></i>
@@ -58,8 +52,8 @@
                 </div>
             </div>
         </div>
-        <!--查询-->
-        <div class="popUps" v-if="isUser">
+        <!-- 查询 -->
+       <div class="popUps" v-if="isUser"> 
             <div class="fuzhi" style="width: 300px;">
                 <div class="fuzhi-top">
                     <i class="iconfont iconguanbi" @click="toUser"></i>
@@ -76,6 +70,10 @@
 </template>
 
 <script>
+	import {
+		unitList
+		
+	} from "@/api/service/addWork.js";
     import request from '@/router/axios';
     import { domainUrl } from '@/config/env';
     import {url} from '@/config/env';
@@ -83,211 +81,163 @@
         name: "history",
         data(){
             return {
+				spanArr: [],
+				position: 0,
+
                 isUser:false,
                 formUser:[],
-                inputBh:"",
-                inputMc:"",
+
                 begTime:"",
                 endTime:"",
                 data:[],
                 page: {
                     total: 0,
                     pageSize:20,
+					page:1
                     //pageSizes:[10,15,20]
                 },
-                option: {
-                    highlightCurrentRow:true,
-                    addBtn:false, //显示新增按钮
-                    delBtn:false, //行内删除
-                    editBtn:false, //行内编辑
-                    viewBtn:false, //行内查看
-                    columnBtn:false, //显示隐藏按钮
-                    refreshBtn:false, //显示刷新按钮
-                    index:true,
-                    indexLabel:'序号',
-                    border:true,
-                    stripe: false,  //斑马纹
-                    labelWidth:170, //弹出表单的label宽度
-                    menu:false,  //是否显示操作菜单栏
-                    selection: true, //多选
-                    column: [
-                        {
-                            label: "是否处理",
-                            prop: "dealName",
-                            row: true,
-                            width:80,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "工单编号",
-                            prop: "billNo",
-                            row: true,
-                            width:110,
-                            overHidden: true,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "标题",
-                            prop: "title",
-                            row: true,
-                            width:200,
-                            overHidden: true,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "指定处理人",
-                            prop: "zdrmz",
-                            row: true,
-                            overHidden: true,
-                            width:110,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "新增问题时间",
-                            prop: "realTime",
-                            row: true,
-                            overHidden: true,
-                            width:130,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "要求完成时间",
-                            prop: "finishtime",
-                            row: true,
-                            overHidden: true,
-                            width:130,
-                            span:16
-                        },
-                        // {
-                        //     sortable:true,
-                        //     label: "提交完成时间",
-                        //     prop: "realSubmitTime",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        // {
-                        //     sortable:true,
-                        //     label: "处理次数",
-                        //     prop: "dealCount",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        {
-                            sortable:true,
-                            label: "新增问题人",
-                            prop: "name",
-                            row: true,
-                            overHidden: true,
-                            width:110,
-                            span:16
-                        },
-                        // {
-                        //     sortable:true,
-                        //     label: "提交完成人",
-                        //     prop: "submitter",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        {
-                            sortable:true,
-                            label: "客户单位",
-                            prop: "clientUnit",
-                            row: true,
-                            width:200,
-                            overHidden: true,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "客户姓名",
-                            prop: "clientName",
-                            row: true,
-                            width:110,
-                            minRows: 8,
-                            overHidden: true,
-                            span:16,
-                        },
-                        {
-                            sortable:true,
-                            label: "联系方式",
-                            prop: "clientPhone",
-                            row: true,
-                            overHidden: true,
-                            width:110,
-                            span:16
-                        },
-                        // {
-                        //     sortable:true,
-                        //     label: "客户评价",
-                        //     prop: "degree",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        // {
-                        //     sortable:true,
-                        //     label: "评价说明",
-                        //     prop: "content",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        {
-                            sortable:true,
-                            label: "紧急情况",
-                            prop: "sexName",
-                            row: true,
-                            width:100,
-                            minRows: 8,
-                            span:16,
-                        },
-                        {
-                            sortable:true,
-                            label: "类型",
-                            prop: "typename",
-                            row: true,
-                            width:150,
-                            span:16,
-                        },
-                        {
-                            sortable:true,
-                            label: "描述",
-                            prop: "description",
-                            row: true,
-                            width:300,
-                            overHidden: true,
-                            minRows: 8,
-                            span:16,
-                        },
-                        {
-                            label: "图片",
-                            prop: "picurls",
-                            dataType: 'string',
-                            type: 'img',
-                            row: true,
-                            width:150,
-                            span:16,
-                        }
-                    ]
-                },
-                form:{
-                    time:"",
-                    title:"",
-                    clientUnit:"",
-                    clientName:"",
-                    clientPhone:"",
-                    type:0,
-                    description:"",
-                    sex:0
-                },
+				option:{
+					highlightCurrentRow:true,
+					addBtn:false, //显示新增按钮
+					delBtn:true, //行内删除
+					editBtn:false, //行内编辑
+					viewBtn:false, //行内查看
+					columnBtn:true, //显示隐藏按钮
+					refreshBtn:false, //显示刷新按钮
+					index:false,
+					indexLabel:'序号',
+					border:true,
+					stripe: false,  //斑马纹
+					labelWidth:170, //弹出表单的label宽度
+					menu:true,  //是否显示操作菜单栏
+					menuWidth:100,
+					selection: true, //多选
+					dialogType:'drawer',
+					dialogWidth:800,
+					height:380,
+					// filterBtn:true,
+					column:[
+						// {
+						//     sortable:true,
+						//     label: "编号",
+						//     prop: "code",
+						//     row: true,
+						//     width:110,
+						//     overHidden: true,
+						//     span:16,
+						// 	fixed:true
+						// },
+						// {
+						//     sortable:true,
+						//     label: "日期",
+						//     prop: "mondayTime",
+						//     row: true,
+						//     overHidden: true,
+						//     width:130,
+						//     span:16
+						// },
+						// {
+						//     sortable:true,
+						//     label: "月份周期",
+						//     prop: "month",
+						//     row: true,
+						//     overHidden: true,
+						//     width:130,
+						//     span:16
+						// },
+						{
+						    sortable:true,
+						    label: "提交人",
+						    prop: "username",
+						    row: true,
+						    overHidden: true,
+						    width:100,
+						    span:16
+						},
+						// {
+						//     sortable:true,
+						//     label: "提交时间",
+						//     prop: "createTimeStr",
+						//     row: true,
+						//     overHidden: true,
+						//     width:100,
+						//     span:16
+						// },
+						{
+						    sortable:true,
+						    label: "星期",
+						    prop: "week",
+							// prop:'mondayTime',
+						    row: true,
+						    overHidden: true,
+						    width:100,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "项目名称",
+						    prop: "pname",
+						    row: true,
+						    overHidden: true,
+						    width:150,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "客户单位",
+						    prop: "custname",
+						    row: true,
+						    overHidden: true,
+						    width:150,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "工作方式",
+						    prop: "mode",
+						    row: true,
+						    overHidden: true,
+						    width:100,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "工作内容",
+						    prop: "content",
+						    row: true,
+						    overHidden: true,
+						    width:130,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "工作总结",
+						    prop: "execute",
+						    row: true,
+						    overHidden: true,
+						    width:130,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "完成情况",
+						    prop: "finish",
+						    row: true,
+						    overHidden: true,
+						    width:130,
+						    span:16
+						},
+						{
+						    sortable:true,
+						    label: "完成百分比",
+						    prop: "percentage",
+						    row: true,
+						    overHidden: true,
+						    width:130,
+						    span:16
+						},
+					]
+				},
                 obj:{},
                 formTj:{
                     id:0,
@@ -296,25 +246,257 @@
                     description:"",
                     picurl:""
                 },
+				idLength:0,//判断选择是一条还是多条
                 dicType:[],
                 typeArr:[],
                 isZhiding:false,
-                name:""
+                name:"",
+				last:7, //上一周
+				next:1, //下一周
+				timeCuo:0 //报错时间戳
             }
         },
         created(){
             this.obj = JSON.parse(this.$cookie.get("token"));
-            //console.log(this.$cookie.get("token"),11111111111111111)
-            this.getXlk();
+            this.monday();
+            this.getXlk();			
         },
         mounted(){
             //this.$refs.crud.$refs.dialogColumn.columnBox=true;
         },
         methods:{
-            // 催办
-            cuiban(){
+			   handleRowDBLClick (row, event) {
+				this.$refs.crud.rowEdit(row,row.$index);
+			  },
 
+			//上一周 
+			lastclick(){	
+				var now = new Date();
+				var week=new Array();
+				var currentWeek = now.getDay();
+				if ( currentWeek == 0 ){
+				currentWeek = 7;
+				}
+				let beg = now.getTime() - (currentWeek+6)*24*60*60*1000; //星期一
+				let date = new Date(beg);
+				var year = date.getFullYear();
+				var month = date.getMonth()+1;
+				var day = date.getDate(); 
+				this.begTime = year + "-" + (month < 10 ? ('0' + month) : month) + "-" + (day < 10 ? ('0' + day) : day);
+
+				let end = now.getTime() - (currentWeek)*24*60*60*1000; //星期日
+				let date1 = new Date(end);
+				var year1 = date1.getFullYear();
+				var month1 = date1.getMonth()+1;
+				var day1 = date1.getDate(); 
+				this.endTime = year1 + "-" + (month1 < 10 ? ('0' + month1) : month1) + "-" + (day1 < 10 ? ('0' + day1) : day1);
+				
+				this.getList(this.page.page,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser);
+
+			},
+			//下一周
+			nextclick(){
+				var now = new Date();
+				var week=new Array();
+				var currentWeek = now.getDay();
+				if ( currentWeek == 0 ){
+				currentWeek = 7;
+				}
+				let beg = now.getTime() - (currentWeek-8)*24*60*60*1000; //星期一
+				let date = new Date(beg);
+				var year = date.getFullYear();
+				var month = date.getMonth()+1;
+				var day = date.getDate(); 
+				this.begTime = year + "-" + (month < 10 ? ('0' + month) : month) + "-" + (day < 10 ? ('0' + day) : day);
+
+				let end = now.getTime() - (currentWeek-14)*24*60*60*1000; //星期日
+				let date1 = new Date(end);
+				var year1 = date1.getFullYear();
+				var month1 = date1.getMonth()+1;
+				var day1 = date1.getDate(); 
+				this.endTime = year1 + "-" + (month1 < 10 ? ('0' + month1) : month1) + "-" + (day1 < 10 ? ('0' + day1) : day1);
+				
+				this.getList(this.page.page,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser);					
+			},
+
+			//计算本周 周一和周日的时间
+			monday(){
+				var now = new Date();
+				var week=new Array();
+				var currentWeek = now.getDay();
+				if ( currentWeek == 0 ){
+					currentWeek = 7;
+				} 
+			
+				let beg = now.getTime() - (currentWeek-1)*24*60*60*1000; //星期一
+				let date = new Date(beg);
+				var year = date.getFullYear();
+				var month = date.getMonth()+1;
+				var day = date.getDate(); 
+				this.begTime = year + "-" + (month < 10 ? ('0' + month) : month) + "-" + (day < 10 ? ('0' + day) : day);
+
+				let end = now.getTime() + (7-currentWeek)*24*60*60*1000;
+				let date1 = new Date(end);
+				var year1 = date1.getFullYear();
+				var month1 = date1.getMonth()+1;
+				var day1 = date1.getDate(); 
+				this.endTime = year1 + "-" + (month1 < 10 ? ('0' + month1) : month1) + "-" + (day1 < 10 ? ('0' + day1) : day1);
+				
+				this.getList(this.page.page,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser);
+			},
+			checkbox_callback(row,index){//初始化加载数据时，如果数据中包含status属性，并且status为'1'则该行不能被选中
+				return true
+			},
+			handleSelectionChange(row) {//rows为选中行的数据的集合
+                //勾选后，需要往后台传递什么数据，从rows中获取即可
+				console.log(row)
+				if(row.length != 0){
+					this.formTj.id = row[0].id;
+					this.idLength = row.length;
+				}
             },
+			rowspan() {
+				this.spanArr = [];
+				this.position = 0;
+			          this.data.forEach((item,index) => {
+			            if( index === 0){
+			                this.spanArr.push(1);
+			                this.position = 0;
+			            }else{
+			                if(this.data[index].type === this.data[index-1].type ){
+			                    this.spanArr[this.position] += 1;
+			                    this.spanArr.push(0);
+			                }else{
+			                    this.spanArr.push(1);
+			                    this.position = index;
+			                }
+			            }
+			        })
+					
+			},
+			objectSpanMethod({ row, column, rowIndex, columnIndex }) {  //表格合并行
+			        if (columnIndex === 0) {
+			            const _row = this.spanArr[rowIndex];
+			            const _col = _row>0 ? 1 : 0;
+			            return {
+			                rowspan: _row,
+			                colspan: _col
+			            }
+			        }
+			        if(columnIndex === 1){
+			            const _row = this.spanArr[rowIndex];
+			            const _col = _row>0 ? 1 : 0;
+			            return {
+			                rowspan: _row,
+			                colspan: _col
+			            }
+			        }
+					// if(columnIndex === 2){
+					//     const _row = this.spanArr[rowIndex];
+					//     const _col = _row>0 ? 1 : 0;
+					//     return {
+					//         rowspan: _row,
+					//         colspan: _col
+					//     }
+					// }
+					// if(columnIndex === 3){
+					//     const _row = this.spanArr[rowIndex];
+					//     const _col = _row>0 ? 1 : 0;
+					//     return {
+					//         rowspan: _row,
+					//         colspan: _col
+					//     }
+					// }
+					// if(columnIndex === 4){
+					//     const _row = this.spanArr[rowIndex];
+					//     const _col = _row>0 ? 1 : 0;
+					//     return {
+					//         rowspan: _row,
+					//         colspan: _col
+					//     }
+					// }
+					// if(columnIndex === 5){
+					//     const _row = this.spanArr[rowIndex];
+					//     const _col = _row>0 ? 1 : 0;
+					//     return {
+					//         rowspan: _row,
+					//         colspan: _col
+					//     }
+					// }
+					// if(columnIndex === 5){
+					//     const _row = this.spanArr[rowIndex];
+					//     const _col = _row>0 ? 1 : 0;
+					//     return {
+					//         rowspan: _row,
+					//         colspan: _col
+					//     }
+					// }
+			},
+			//获取列表
+			getList(page,pageSize,begTime,endTime,userId,userids){
+				var self = this;
+			    this.data = [];
+			    let obj = {
+			        pageNum:page,
+			        pageSize:pageSize,
+			        // title:unit,
+			        // name:name,
+			        begTime:begTime,
+			        endTime:endTime,
+			        userId:userId,
+			        userids:userids
+			    }
+			    let dataArr = request({
+			        url:domainUrl + '/queryPlan',
+			        data:obj,
+			        method:'POST'
+			    })
+			    dataArr.then(res => {
+					let list = res.data.list; //主表
+					let sublist = res.data.sublist;
+					this.data = [];
+					for(var i = 0;i<list.length;i++){
+						for(var j =0;j<sublist.length;j++){
+							if(list[i].id == sublist[j].parentId){
+								let month = "";
+								if(list[i].month == undefined){
+									month = "";
+								}else{
+									month = list[i].month + "-" +list[i].week;
+								}
+								 if(sublist[j].begTime == undefined){
+									 sublist[j].begTime = "";
+								 }
+								let obj = {
+									id:list[i].id,
+									type:list[i].id,
+									code:list[i].code,
+									mondayTime:list[i].mondayTime + "至" + list[i].sundayTime,
+									userid:list[i].userid,
+									username:list[i].username,
+									createTimeStr:list[i].createTimeStr,
+									month:month,
+									week:sublist[j].begTime +"</br>"+ sublist[j].week,
+									pname:sublist[j].pname,
+									custname:sublist[j].custname,
+									custId:sublist[j].custId,
+									mode:sublist[j].mode,
+									content:sublist[j].content,
+									execute:sublist[j].execute,
+									finish:sublist[j].finish,
+									percentage:sublist[j].percentage,
+								}
+								this.data.push(obj);
+							}
+						}
+					}
+					self.rowspan();	
+					this.page.total = res.data.total;
+					this.page.pageSize = res.data.pageSize;
+					
+				
+			    })
+			},
             //行单元格的样式
             cellStyle({row,column,rowIndex}){
                 if(row.status == 1){
@@ -340,7 +522,7 @@
             },
             //角色查询
             userQd(){
-                this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
+                this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
                 this.isUser = false;
             },
             userAdd(){
@@ -372,7 +554,7 @@
                 dataArr.then(res => {
                     if(res.data.success){
                         this.$message.success("分配成功!");
-                        this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
+                        this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
                         this.isZhiding = false;
                         this.formTj.id = 0;
                     }
@@ -396,7 +578,6 @@
             },
 			//选择
             selectionChange(list){
-				console.log(list,111111111111111)
                 if(list.length != 0){
                     if(list.length>1){
                         // this.$message.error("请选择需一条的数据!");
@@ -406,22 +587,20 @@
                     }
                 }
             },
-            toDelete(){
-                if(this.formTj.id != 0 || this.formTj.id != ""){
-                    let dataArr = request({
-                        url:domainUrl + '/del?id=' + this.formTj.id,
-                        method:'GET'
-                    })
-                    dataArr.then(res => {
-                        if(res.data.success){
-                            this.$message.success("删除成功!");
-                            this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
-                        }
-                    })
-                    //this.$router.push({ path: '/addWork',query: { userId: 2,id:self.formTj.id }});
-                }else {
-                    this.$message.error("请选择需要删除的数据!");
-                }
+            deleteData(row){
+				let dataArr1 = request({
+				    url:domainUrl+ '/delPlan?id=' + row.id,
+				    method:'GET',
+				    header: { 'content-Type': 'application/json' },
+				})
+				dataArr1.then(res => {
+				    if(res.data.success){
+				        this.$message.success(res.data.msg);
+				        this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
+				    }else {
+				        this.$message.error(res.data.msg);
+				    }
+				})
             },
             //点击提交完成
             //下拉框数据
@@ -436,54 +615,34 @@
                     this.typeArr = res.data;
                 })
             },
-            getList(page,pageSize,unit,name,begTime,endTime,userId,userids){
-                this.data = [];
-                let obj = {
-                    pageNum:page,
-                    pageSize:pageSize,
-                    title:unit,
-                    name:name,
-                    begTime:begTime,
-                    endTime:endTime,
-                    userId:userId,
-                    userids:userids
-                }
-                let dataArr = request({
-                    url:domainUrl + '/find',
-                    data:obj,
-                    method:'POST'
-                })
-                dataArr.then(res => {
-                    this.page.total = res.data.total;
-                    this.page.pageSize = res.data.pageSize;
-                    this.data = res.data.list;
-                })
-            },
             onLoad(page){
-                this.getList(page.currentPage,page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
+                this.getList(page.currentPage,page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
             },
             //新增
             subSucc(name){
                 if(name == 1){
                     this.formTj.id = 0;
-                    this.$router.push({ path: '/workOrdeSystem//addWork',query: { userId: name,id:this.formTj.id }});
+                    this.$router.push({ path: '/weeklyPlanningSystem//addWeeklyPlan',query: { userId: name,id:this.formTj.id }});
                 }else {
-                    if(this.formTj.id != 0 || this.formTj.id != ""){
-                        this.$router.push({ path: '/workOrdeSystem//addWork',query: { userId: name,id:this.formTj.id }});
-                    }else {
-                        this.$message.error("请选择需要提交完成的数据!");
-                    }
+					console.log(this.idLength,11111111)
+					if(this.idLength > 1){
+						this.$message.error("请选择一条修改的数据!");
+					}else{
+						if(this.formTj.id != 0 || this.formTj.id != ""){
+							this.$router.push({ path: '/weeklyPlanningSystem//addWeeklyPlan',query: { userId: name,id:this.formTj.id }});
+						}else {
+							this.$message.error("请选择需要修改的数据!");
+						}	
+					}
                 }
                 //  1表示新增工单，2表示提交工单，3表示查看工单
 
             },
             //查询
             submitcx(){
-                this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
+                this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
             },
             error(){
-                this.inputBh = "";
-                this.inputMc = "";
                 this.begTime = "";
                 this.endTime = "";
             },
@@ -503,28 +662,91 @@
                     });
                 }
             },
-            //点击查看
-            subChakan(){
-                let obj = {
-                    id:this.formTj.id
-                }
-                if(this.formTj.id != 0 || this.formTj.id != ""){
-                    this.chakan = true;
-                    this.$router.push({ path: '/addWork',query: { userId: 3,id:this.formTj.id }});
-                }else {
-                    this.$message.error("请选择需要提交完成的数据!");
-                }
 
-            },
 
         }
     }
 </script>
 
 <style scoped>
-	.avue-crud >>> .el-table__body-wrapper{
-/* 		height: 380px;
-		overflow: auto; */
+	.avue-crud >>> .el-form{
+			height: 380px;
+			overflow: auto;
+		}
+	.topBtn{
+		width: 70px;
+		height: 35px;
+		text-align: center;
+		line-height: 30px;
+		border: 1px solid #0073EB;
+		background: #fff;
+		float: left;
+		border-radius: 3px;
+		margin-right: 10px;
+	}
+	.topTr >>> .is-leaf{
+		height: 40px;
+		text-align: center;
+	}
+	.el-select {
+	  margin-right: 15px;
+	}
+	.el-input {
+	  margin-right: 15px;
+	  width: 200px;
+	}
+	.tableArea {
+	  margin-top: 20px;
+	  border: 1px solid #ddd;
+	  border-radius: 3px;
+
+	}
+	i[class^="el-icon"] {
+	  margin-right: 5px;
+	  font-size: 16px;
+	  cursor: pointer;
+	}
+	.modify_table{
+	    td{
+	        padding: 10px ;
+	    }
+	}
+	.item_title{
+	    text-align: right;
+	}
+	
+	.tdInput{
+		width: 15px;
+		height: 15px;
+		border: 1px solid #ddd;
+		border-radius: 3px;
+		cursor: pointer;
+	}
+	.tdInputT{
+		width: 15px;
+		height: 15px;
+		border: 1px solid #ddd;
+		border-radius: 3px;
+		cursor: pointer;
+	}
+	.topTr td{
+		color: #999;
+	}
+	.conTable{
+		width: 100%;
+		height: 100%;
+		overflow: auto;
+		border: 1px solid #ddd;
+	}
+/* 	.conTable tr{
+		border-bottom: 1px solid #ddd;
+	} */
+	.conTable tr td{
+		border: 1px solid #ddd;
+		height: 35px;
+		text-align: center;
+		line-height: 35px;
+		color: #666;
 	}
     /*.avue-crud >>> .el-form{*/
         /*height: 450px;*/
@@ -559,34 +781,6 @@
         background: #fff;
         margin: 5px 10px 0 0;
     }
-    /*.inputTop{*/
-        /*text-align: left;*/
-        /*margin-left: 10px;*/
-        /*height: 32px;*/
-        /*line-height: 32px;*/
-        /*border-bottom: 1px solid #ddd;*/
-    /*}*/
-    /*.inputTop input{*/
-        /*width: 15px;*/
-        /*height: 15px;*/
-        /*margin-right: 10px*/
-    /*}*/
-    /*.fuzhi-mid ul{*/
-        /*padding: 0;*/
-        /*margin: 0;*/
-    /*}*/
-    /*.fuzhi-mid ul li{*/
-        /*list-style: none;*/
-        /*height: 32px;*/
-        /*line-height: 32px;*/
-        /*border-bottom: 1px solid #ddd;*/
-        /*padding-left: 25px;*/
-    /*}*/
-    /*.fuzhi-mid ul li input{*/
-        /*width: 15px;*/
-        /*height: 15px;*/
-        /*margin-right: 10px;*/
-    /*}*/
 
 
     .el-col{
@@ -598,7 +792,9 @@
 
 
     .avue-crud >>> .avue-crud__menu{
-        display: none;
+        /* display: none; */
+		    width: 50px;
+		    float: right;
     }
     .fuzhi-top{
         text-align: right;
@@ -955,6 +1151,9 @@
     /*.avue-crud__menu{*/
         /*display: none;*/
     /*}*/
+	.el-drawer{
+		width: 800px;
+	}
     .cell{
         font-weight: 400;
     }
@@ -964,8 +1163,5 @@
     .el-card__body{
         padding-top: 0;
     }
-    /*.el-form{*/
-        /*height: 370px;*/
-        /*overflow: auto;*/
-    /*}*/
+
 </style>

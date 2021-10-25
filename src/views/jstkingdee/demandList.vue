@@ -2,12 +2,12 @@
     <basic-container>
         <el-row :span="24">
             <el-col :span="5">
-                <div class="sqTop">标题:</div>
-                <avue-input class="input" v-model="inputBh" placeholder="请输入标题" ></avue-input>
+                <div class="sqTop">需求名称:</div>
+                <avue-input class="input" v-model="inputBh" placeholder="请输入需求名称" ></avue-input>
             </el-col>
             <el-col :span="5">
-                <div class="sqTop">客户单位:</div>
-                <avue-input v-model="inputMc" placeholder="请输入客户单位" ></avue-input>
+                <div class="sqTop">所属项目:</div>
+                <avue-input v-model="inputMc" placeholder="请输入所属项目" ></avue-input>
             </el-col>
             <el-col :span="10">
                 <div class="sqTop">查询日期:</div>
@@ -23,54 +23,20 @@
             </el-col>
             <el-col :span="24">
                 <div class="btn-right">
-                    <button @click="subSucc(1)">新增工单</button>
-                    <button style="margin-right: 10px" @click="subSucc(4)">修改工单</button>
-                    <button v-if="this.obj.roleid != 3" style="margin-right: 10px" @click="subSucc(2)">处理工单</button>
-                    <button style="margin-right: 10px" @click="subSucc(3)">查看工单</button>
-                    <button style="margin-right: 10px" @click="toDelete">删除工单</button>
-                    <button v-if="obj.roleid == 1" style="margin-right: 10px;" @click="zhiding">分配工单</button>
-                    <button v-if="obj.roleid == 1" style="margin-right: 10px;" @click="cuiban">催办</button>
-                </div>
-                <div class="userName" @click="userAdd">
-                    <i class="iconfont iconbumenguanli"></i>
-                </div>
+                    <button @click="subSucc(1)">新增</button>
+                    <button style="margin-right: 10px" @click="subSucc(4)">完成</button>
+				</div>
             </el-col>
         </el-row>
         <div>
-            <avue-crud ref="crud" :option="option" :page.sync="page" :data="data" @on-load="onLoad" @row-click="handleRowClick" @selection-change="selectionChange" :cell-style="cellStyle"></avue-crud>
-        </div>
-        <!--指定分配人-->
-        <div class="popUps" v-if="isZhiding">
-            <div class="fuzhi">
-                <div class="fuzhi-top">
-                    <i class="iconfont iconguanbi" @click="toZd"></i>
-                </div>
-                <div class="susou">
-                    <div class="name">姓名:</div>
-                    <input type="text" v-model="name" placeholder="请输入姓名">
-                    <button @click="toSs">搜索</button>
-                </div>
-                <div class="fuzhi-mid">
-                    <el-table :data="dicType" height="390" style="width: 100%" @row-dblclick="openDetails">
-                        <el-table-column prop="value" label="id" width="180"></el-table-column>
-                        <el-table-column prop="label" label="姓名" width="180"></el-table-column>
-                    </el-table>
-                </div>
-            </div>
-        </div>
-        <!--查询-->
-        <div class="popUps" v-if="isUser">
-            <div class="fuzhi" style="width: 300px;">
-                <div class="fuzhi-top">
-                    <i class="iconfont iconguanbi" @click="toUser"></i>
-                </div>
-                <div class="fuzhi-mid" style="text-align: left;overflow-y: auto;overflow-x:hidden;width: 285px">
-                    <avue-checkbox all v-model="formUser" placeholder="请选择内容" :dic="dicType"></avue-checkbox>
-                </div>
-                <div class="popBtn">
-                    <button @click="userQd">确定</button>
-                </div>
-            </div>
+            <avue-crud ref="crud" :option="option" :page.sync="page" :data="data" @on-load="onLoad" @row-update="upDemand" @row-del="delDemand" @row-click="handleRowClick" @selection-change="selectionChange" :cell-style="cellStyle">
+			  <template slot-scope="scope" slot="namesForm">
+				<div>
+				  <span>{{objDemand.names}}</span>
+				  <avue-input :disabled="scope.disabled" :label="scope.column.label" v-model="objDemand.names"></avue-input>
+				</div>
+			  </template>
+			</avue-crud>
         </div>
     </basic-container>
 </template>
@@ -83,7 +49,7 @@
         name: "history",
         data(){
             return {
-                isUser:false,
+				objDemand:{},
                 formUser:[],
                 inputBh:"",
                 inputMc:"",
@@ -98,9 +64,10 @@
                 option: {
                     highlightCurrentRow:true,
                     addBtn:false, //显示新增按钮
-                    delBtn:false, //行内删除
-                    editBtn:false, //行内编辑
-                    viewBtn:false, //行内查看
+                    delBtn:true, //行内删除
+                    editBtn:true, //行内编辑
+					editTitle:"修改",
+                    viewBtn:true, //行内查看
                     columnBtn:false, //显示隐藏按钮
                     refreshBtn:false, //显示刷新按钮
                     index:true,
@@ -108,213 +75,199 @@
                     border:true,
                     stripe: false,  //斑马纹
                     labelWidth:170, //弹出表单的label宽度
-                    menu:false,  //是否显示操作菜单栏
+                    menu:true,  //是否显示操作菜单栏
                     selection: true, //多选
                     column: [
                         {
-                            label: "是否处理",
-                            prop: "dealName",
+                            label: "是否完成",
+                            prop: "finish",
                             row: true,
                             width:80,
-                            span:16
+                            span:16,
+							display:false,
                         },
                         {
                             sortable:true,
-                            label: "工单编号",
-                            prop: "billNo",
+                            label: "编号",
+                            prop: "code",
                             row: true,
                             width:110,
                             overHidden: true,
-                            span:16
+                            span:16,
+							display:false,
                         },
                         {
                             sortable:true,
-                            label: "标题",
-                            prop: "title",
-                            row: true,
-                            width:200,
-                            overHidden: true,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "指定处理人",
-                            prop: "zdrmz",
-                            row: true,
-                            overHidden: true,
-                            width:110,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "新增问题时间",
-                            prop: "realTime",
-                            row: true,
-                            overHidden: true,
-                            width:130,
-                            span:16
-                        },
-                        {
-                            sortable:true,
-                            label: "要求完成时间",
-                            prop: "finishtime",
-                            row: true,
-                            overHidden: true,
-                            width:130,
-                            span:16
-                        },
-                        // {
-                        //     sortable:true,
-                        //     label: "提交完成时间",
-                        //     prop: "realSubmitTime",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        // {
-                        //     sortable:true,
-                        //     label: "处理次数",
-                        //     prop: "dealCount",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        {
-                            sortable:true,
-                            label: "新增问题人",
+                            label: "需求名称",
                             prop: "name",
                             row: true,
+                            width:200,
                             overHidden: true,
-                            width:110,
-                            span:16
+                            span:16,
+							display:false,
                         },
-                        // {
-                        //     sortable:true,
-                        //     label: "提交完成人",
-                        //     prop: "submitter",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
                         {
                             sortable:true,
-                            label: "客户单位",
-                            prop: "clientUnit",
+                            label: "所属项目",
+                            prop: "pname",
+                            row: true,
+                            overHidden: true,
+                            width:110,
+                            span:16,
+							display:false,
+                        },
+                        {
+                            sortable:true,
+                            label: "提交时间",
+                            prop: "timeStr",
+                            row: true,
+                            overHidden: true,
+                            width:130,
+                            span:16,
+							display:false,
+                        },
+                        {
+                            sortable:true,
+                            label: "指定人",
+                            prop: "uname",
+                            row: true,
+                            overHidden: true,
+                            width:110,
+                            span:16,
+							display:false,
+                        },
+                        {
+                            sortable:true,
+                            label: "需求来源",
+                            prop: "src",
                             row: true,
                             width:200,
                             overHidden: true,
-                            span:16
+                            span:16,
+							display:false,
                         },
                         {
                             sortable:true,
-                            label: "客户姓名",
-                            prop: "clientName",
+                            label: "计划",
+                            prop: "plan",
                             row: true,
                             width:110,
                             minRows: 8,
                             overHidden: true,
                             span:16,
+							display:false,
                         },
                         {
                             sortable:true,
-                            label: "联系方式",
-                            prop: "clientPhone",
+                            label: "优先级",
+                            prop: "level",
                             row: true,
                             overHidden: true,
                             width:110,
-                            span:16
+                            span:16,
+							display:false,
                         },
-                        // {
-                        //     sortable:true,
-                        //     label: "客户评价",
-                        //     prop: "degree",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
-                        // {
-                        //     sortable:true,
-                        //     label: "评价说明",
-                        //     prop: "content",
-                        //     row: true,
-                        //     width:180,
-                        //     span:16
-                        // },
                         {
                             sortable:true,
-                            label: "紧急情况",
-                            prop: "sexName",
+                            label: "工时",
+                            prop: "hour",
                             row: true,
                             width:100,
                             minRows: 8,
                             span:16,
+							display:false,
                         },
                         {
                             sortable:true,
-                            label: "类型",
-                            prop: "typename",
-                            row: true,
-                            width:150,
-                            span:16,
-                        },
-                        {
-                            sortable:true,
-                            label: "描述",
-                            prop: "description",
+                            label: "需求描述",
+                            prop: "describ",
                             row: true,
                             width:300,
                             overHidden: true,
                             minRows: 8,
                             span:16,
+							display:false,
                         },
-                        {
-                            label: "图片",
-                            prop: "picurls",
-                            dataType: 'string',
-                            type: 'img',
-                            row: true,
-                            width:150,
-                            span:16,
-                        }
-                    ]
+ 
+                    ],
+					group:[
+						{
+						  label: '需求信息',
+						  prop: 'jbxx',
+						  icon: 'el-icon-edit-outline',
+						  column: [
+							{
+								label: "提交时间",
+								prop: "timeStr",
+								span: 12,
+								type: "date",
+								format:'yyyy-MM-dd',
+								readonly:true,
+								valueFormat:'yyyy-MM-dd',
+							},
+							{
+								label: "指定人",
+								prop: "uid",
+								span: 12,
+								type: "select",
+								dicData:[],
+							},
+							{
+								label: "所属项目",
+								prop: "pid",
+								span: 12,
+								type: "select",
+								dicData:[],
+							},
+							{
+								label: "需求来源",
+								prop: "src",
+								span: 12,
+							},
+							{
+								label: "计划",
+								prop: "plan",
+								span: 12,
+							},
+							{
+								label: "优先级",
+								prop: "level",
+								span: 12,
+								type: "select",
+								dicData:[{label:"一级",value:"一级"},{label:"二级",value:"二级"},{label:"三级",value:"三级"},],
+							},
+							{
+								label: "工时",
+								prop: "hour",
+								span: 12,
+							},
+							{
+								label: "需求名称",
+								prop: "name",
+								span: 24,
+							},
+							{
+								label: "需求描述",
+								prop: "describ",
+								span: 24,
+								type:"textarea"
+							},
+						  ]
+						},
+					]
                 },
-                form:{
-                    time:"",
-                    title:"",
-                    clientUnit:"",
-                    clientName:"",
-                    clientPhone:"",
-                    type:0,
-                    description:"",
-                    sex:0
-                },
-                obj:{},
-                formTj:{
-                    id:0,
-                    time:"",
-                    deal:1,
-                    description:"",
-                    picurl:""
-                },
-                dicType:[],
-                typeArr:[],
-                isZhiding:false,
+				obj:{},
+               
                 name:""
             }
         },
         created(){
             this.obj = JSON.parse(this.$cookie.get("token"));
-            //console.log(this.$cookie.get("token"),11111111111111111)
-            this.getXlk();
         },
         mounted(){
             //this.$refs.crud.$refs.dialogColumn.columnBox=true;
         },
         methods:{
-            // 催办
-            cuiban(){
-
-            },
             //行单元格的样式
             cellStyle({row,column,rowIndex}){
                 if(row.status == 1){
@@ -329,66 +282,7 @@
                     }
                 }
             },
-			//指定分配人搜索
-            toSs(){
-                if(this.name){
-                    let arr = this.fSearch(this.name,this.typeArr);
-                    this.dicType = arr;
-                }else {
-                    this.dicType = this.typeArr;
-                }
-            },
-            //角色查询
-            userQd(){
-                this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
-                this.isUser = false;
-            },
-            userAdd(){
-                this.isUser = true;
-                this.formUser = [];
-            },
-            toUser(){
-                this.isUser = false;
-            },
-            //前端模糊查询
-            fSearch(name,list){
-                if(name){
-                    return list.filter((value)=>{  //过滤数组元素
-                        return value.label.includes(name); //如果包含字符返回true
-                    });
-                }
-            },
-			//双击选中
-            openDetails(row){
-                let obj = {
-                    zdr:row.value,
-                    id:this.formTj.id
-                }
-                let dataArr = request({
-                    url:domainUrl + '/updateZdr',
-                    data:obj,
-                    method:'POST'
-                })
-                dataArr.then(res => {
-                    if(res.data.success){
-                        this.$message.success("分配成功!");
-                        this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
-                        this.isZhiding = false;
-                        this.formTj.id = 0;
-                    }
-                })
-            },
-            zhiding(){
-                if(this.formTj.id != 0 || this.formTj.id != ""){
-                    this.isZhiding = true;
-                }else {
-                    this.$message.error("请选择需要指定的数据!");
-                }
 
-            },
-            toZd(){
-                this.isZhiding = false;
-            },
             //单击行
             handleRowClick(row, event, column){
                 this.formTj.id = row.id;
@@ -396,10 +290,8 @@
             },
 			//选择
             selectionChange(list){
-				console.log(list,111111111111111)
                 if(list.length != 0){
                     if(list.length>1){
-                        // this.$message.error("请选择需一条的数据!");
                     }else {
                         this.formTj.id = list[0].id;
                         this.form.userId = this.obj.id;
@@ -423,25 +315,12 @@
                     this.$message.error("请选择需要删除的数据!");
                 }
             },
-            //点击提交完成
-            //下拉框数据
-            getXlk(){
-                let dataArr = request({
-                    url:domainUrl+ '/findUsers',
-                    method:'GET',
-                    header: { 'content-Type': 'application/json' },
-                })
-                dataArr.then(res => {
-                    this.dicType = res.data;
-                    this.typeArr = res.data;
-                })
-            },
             getList(page,pageSize,unit,name,begTime,endTime,userId,userids){
                 this.data = [];
                 let obj = {
                     pageNum:page,
                     pageSize:pageSize,
-                    title:unit,
+                    pname:unit,
                     name:name,
                     begTime:begTime,
                     endTime:endTime,
@@ -449,7 +328,7 @@
                     userids:userids
                 }
                 let dataArr = request({
-                    url:domainUrl + '/find',
+                    url:domainUrl + '/queryDemand',
                     data:obj,
                     method:'POST'
                 })
@@ -464,19 +343,51 @@
             },
             //新增
             subSucc(name){
-                if(name == 1){
-                    this.formTj.id = 0;
-                    this.$router.push({ path: '/workOrdeSystem//addWork',query: { userId: name,id:this.formTj.id }});
-                }else {
-                    if(this.formTj.id != 0 || this.formTj.id != ""){
-                        this.$router.push({ path: '/workOrdeSystem//addWork',query: { userId: name,id:this.formTj.id }});
-                    }else {
-                        this.$message.error("请选择需要提交完成的数据!");
-                    }
-                }
+				console.log(111111)
+                // if(name == 1){
+                //     this.formTj.id = 0;
+                //     this.$router.push({ path: '/demandSystem//demand',query: { userId: name,id:this.formTj.id }});
+                // }else {
+                //     if(this.formTj.id != 0 || this.formTj.id != ""){
+                //         this.$router.push({ path: '/demandSystem//demand',query: { userId: name,id:this.formTj.id }});
+                //     }else {
+                //         this.$message.error("请选择需要提交完成的数据!");
+                //     }
+                // }
                 //  1表示新增工单，2表示提交工单，3表示查看工单
 
             },
+			//修改保存
+			upDemand(row){
+				let addData = request({
+				    url:domainUrl + '/uptDemand',
+				    data:row,
+				    method:'POST'
+				})
+				addData.then(res => {
+				    if(res.data.success){
+				        this.$message.success(res.data.msg);	
+				    }else{
+						this.$message.error(res.data.message);
+					}
+				})
+			},
+			//删除
+			delDemand(row){
+				let dataArr1 = request({
+				    url:domainUrl+ '/delDemand?id=' + row.id,
+				    method:'GET',
+				    header: { 'content-Type': 'application/json' },
+				})
+				dataArr1.then(res => {
+				    if(res.data.success){
+				        this.$message.success(res.data.msg);
+				        this.getList(this.page.currentPage,this.page.pageSize)
+				    }else {
+						this.submitcx();
+				    }
+				})
+			},
             //查询
             submitcx(){
                 this.getList(this.page.currentPage,this.page.pageSize,this.inputBh,this.inputMc,this.begTime,this.endTime,this.obj.id,this.formUser)
@@ -523,8 +434,7 @@
 
 <style scoped>
 	.avue-crud >>> .el-table__body-wrapper{
-/* 		height: 380px;
-		overflow: auto; */
+		height: 380px;
 	}
     /*.avue-crud >>> .el-form{*/
         /*height: 450px;*/
@@ -598,7 +508,7 @@
 
 
     .avue-crud >>> .avue-crud__menu{
-        display: none;
+       display: none;
     }
     .fuzhi-top{
         text-align: right;

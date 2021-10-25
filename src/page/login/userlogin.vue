@@ -120,6 +120,7 @@ export default {
   },
   created() {
     this.refreshCode();
+
   },
   mounted() {},
   computed: {
@@ -153,12 +154,16 @@ export default {
                 if(!res.data.success){
                     this.$message.error(res.data.msg);
                 }else {
+		
                     let obj = JSON.stringify(res.data);
                     this.$cookie.set('token',obj,360);
                     this.$refs.loginForm.validate(valid => {
-                        if (valid) {
+                        if (valid) {	
                             this.$store.dispatch("LoginByUsername", this.loginForm).then(() => {
+								console.log(this.tagWel.value,111111111)
+								///wel/index
                                 this.$router.push({ path: this.tagWel.value});
+								//this.$router.push({ path: '/wel/index'});
                             });
                         }
                     });

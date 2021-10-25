@@ -7,9 +7,6 @@
                     <ul>
                         <li v-for="item in unitArr" @click="openDetails(item.client_unit,item.client_name,item.client_phone)">{{item.client_unit}} ({{item.client_name}})</li>
                     </ul>
-                    <!--<el-table :data="unitArr" style="width: 100%" @row-click="openDetails">-->
-                        <!--<el-table-column prop="client_unit" label=""></el-table-column>-->
-                    <!--</el-table>-->
                 </div>
             </div>
         </div>
@@ -48,6 +45,8 @@
                             <div class="list-input">
                                 <div class="list-left"><span style="color: red">*</span>客户单位:</div>
                                 <avue-input class="list-right" v-model="form.clientUnit" placeholder="请输入客户单位"></avue-input>
+								<avue-input-table :props="props" :column="column" :formatter="formatter" :on-load="onLoad" v-model="formUnit" placeholder="请选择数据"></avue-input-table>
+								<i class="iconfont iconcategory"></i>
                             </div>
                         </el-col>
                         <el-col>
@@ -117,84 +116,11 @@
                     <div class="topText">
                         客户信息:
                     </div>
-                    <el-row :span="24">
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">提交时间:</div>
-                                <avue-input class="list-right" readonly="readonly" v-model="form.time" placeholder="系统自动生成"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">指定处理人:</div>
-                                <avue-input-tree class="list-right" v-model="form.zdr" :dic="dicName" placeholder="请选择指定处理人"></avue-input-tree>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">标题:</div>
-                                <avue-input class="list-right" readonly="readonly" v-model="form.title" type="tree" placeholder="请输入标题"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">要求完成时间:</div>
-                                <avue-input class="list-right" disabled v-model="form.finishtime" placeholder="系统自动生成"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">客户单位:</div>
-                                <avue-input class="list-right" readonly="readonly" v-model="form.clientUnit" placeholder="请输入客户单位"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">客户姓名:</div>
-                                <avue-input class="list-right" readonly="readonly" v-model="form.clientName" placeholder="请输入客户姓名"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">客户电话:</div>
-                                <avue-input class="list-right" readonly="readonly" v-model="form.clientPhone" placeholder="请输入客户电话"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">金蝶类型:</div>
-                                <avue-input-tree class="list-right" readonly v-model="form.type" :dic="dicType" placeholder="请输入金蝶类型"></avue-input-tree>
-                            </div>
-                        </el-col>
-                        <el-col :span="12">
-                            <div class="list-input">
-                                <div class="list-left" style="width: 38%"><span style="color: red">*</span>紧急情况:</div>
-                                <avue-radio v-model="form.sex" :dic="dic"></avue-radio>
-                            </div>
-                        </el-col>
-                        <el-col :span="12">
-                            <div class="list-input" style="text-align: right">
-                                <avue-radio v-model="form.xqlx" :dic="demand"></avue-radio>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input" style="height: 130px">
-                                <div class="list-left">描述:</div>
-                                <avue-input type="textarea" readonly="readonly" class="list-textarea" v-model="form.description" placeholder="请输入描述"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <p class="popP">提交的图片</p>
-                            <div class="imgSx" v-if="form.picurls.length != 0">
-                                <div class="img-list" v-for="item in form.picurls">
-                                    <viewer style="height: 100%;">
-                                        <img :src="item" title="点击放大">
-                                    </viewer>
-                                </div>
-                            </div>
-                        </el-col>
-                    </el-row>
-                    <div class="topText">
+					<div name="first">
+						<First></First>		
+					</div>
+					
+					<div class="topText">
                         提交信息:
                     </div>
                     <el-row :span="24">
@@ -250,84 +176,11 @@
                     <div class="topText">
                         客户信息:
                     </div>
-                    <el-row :span="24">
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">提交时间:</div>
-                                <avue-input class="list-right" readonly v-model="form.time" placeholder="系统自动生成"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">指定处理人:</div>
-                                <avue-input-tree class="list-right" v-model="form.zdr" :dic="dicName" placeholder="请选择指定处理人"></avue-input-tree>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">标题:</div>
-                                <avue-input class="list-right" readonly v-model="form.title" type="tree" placeholder="请输入标题"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">要求完成时间:</div>
-                                <avue-input class="list-right" disabled v-model="form.finishtime" placeholder="系统自动生成"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">客户单位:</div>
-                                <avue-input class="list-right" readonly v-model="form.clientUnit" placeholder="请输入客户单位"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">客户姓名:</div>
-                                <avue-input class="list-right" readonly v-model="form.clientName" placeholder="请输入客户姓名"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">客户电话:</div>
-                                <avue-input class="list-right" readonly v-model="form.clientPhone" placeholder="请输入客户电话"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input">
-                                <div class="list-left">金蝶类型:</div>
-                                <avue-input-tree class="list-right" readonly v-model="form.type" :dic="dicType" placeholder="请输入金蝶类型"></avue-input-tree>
-                            </div>
-                        </el-col>
-                        <el-col :span="12">
-                            <div class="list-input">
-                                <div class="list-left" style="width: 38%"><span style="color: red">*</span>紧急情况:</div>
-                                <avue-radio v-model="form.sex" :dic="dic" @change="toJinji"></avue-radio>
-                            </div>
-                        </el-col>
-                        <el-col :span="12">
-                            <div class="list-input" style="text-align: right">
-                                <avue-radio v-model="form.xqlx" :dic="demand"></avue-radio>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <div class="list-input" style="height: 130px">
-                                <div class="list-left">描述:</div>
-                                <avue-input type="textarea" readonly class="list-textarea" v-model="form.description" placeholder="请输入描述"></avue-input>
-                            </div>
-                        </el-col>
-                        <el-col>
-                            <p class="popP">图片</p>
-                            <div class="imgSx" v-if="form.picurls.length != 0">
-                                <div class="img-list" v-for="item in form.picurls">
-                                    <viewer style="height: 100%;">
-                                        <img :src="item" title="点击放大">
-                                    </viewer>
-                                </div>
-                            </div>
-                        </el-col>
-                    </el-row>
-                    <!--提交信息-->
+					<div name="first">
+						<First></First>		
+					</div>
+
+					<!--提交信息-->
                     <div v-if="chakanArr.length != 0">
                         <div class="topText" style="border-bottom: none;margin-bottom: 0;padding-bottom: 0">
                             提交信息:
@@ -424,11 +277,19 @@
     import request from '@/router/axios';
     import { domainUrl } from '@/config/env';
     import {url} from '@/config/env';
-
+	
+	import First from './child/client.vue'
     export default {
         name: "addWork",
+		components: { First },
         data(){
             return {
+				page: {
+				    total: 0,
+				    pageSize:10,
+					page:1,
+				    //pageSizes:[10,15,20]
+				},
                 userId:0, //判断是哪个页面
                 obj:{}, //获取用户信息
                 text:"", //标题
@@ -465,8 +326,38 @@
                 isFz:false,
 
                 unitArr:[],
-                isKg:true
-
+                isKg:true,
+				
+				column:{
+				  children:{
+					border: true,
+					column: [{
+					  label: '单位名称',
+					  width: 200,
+					  search:true,
+					  prop: 'unitName'
+					}, {
+					  label: '姓名',
+					  search:true,
+					  prop: 'custName'
+					},{
+					  label: '电话号码',
+					  search:true,
+					  prop: 'tel'
+					}],
+				  },
+				},
+				props: {
+				  label: 'unitName',
+				  value: 'id'
+				},
+				formUnit:'0',
+				kehuArr:[],
+				unitName:'',
+				custName:'',
+				tel:'',
+				
+				isComplete:true
             }
         },
         created(){
@@ -475,6 +366,7 @@
                 this.form.clientName = this.obj.realname;
                 this.form.clientUnit = this.obj.unit;
                 this.form.clientPhone = this.obj.tel;
+			
             }
             let date = new Date();
             this.form.time = this.formatTime(date,0,0);
@@ -515,8 +407,65 @@
                     }
                 })
             }
+			//this.unitList();
         },
         methods:{
+			unitList(page,pageSize,unitName,custName,tel){
+				//客户信息
+				//this.kehuArr = [];
+				let obj = {
+					pageNum:page,
+					pageSize:pageSize,
+					unitName:unitName,
+					custName:custName,
+					tel:tel		
+				}
+				let kehu = request({
+					url:domainUrl+ '/custList',
+					data:obj,
+					method:'POST'
+				})
+				kehu.then(res => {
+					this.kehuArr = res.data.list;
+					this.page.total = res.data.total;
+				})
+			},
+			//确定选中
+			formatter(row){
+				this.form.clientUnit = row.unitName;
+				this.form.clientName = row.custName;
+				this.form.clientPhone = row.tel;
+			},
+			onLoad({ page, value,data }, callback){
+					//首次加载去查询对应的值
+					var self = this;
+					if (value) {
+						this.unitList(this.page.currentPage,this.page.pageSize,this.unitName,this.custName,this.tel);
+						//分页查询信息
+						callback({
+						  total:self.page.total,
+						  data: self.kehuArr
+						})
+					}
+					if(data){
+						this.unitName = data.unitName;
+						this.custName = data.custName;
+						this.tel = data.tel;
+
+					}
+					if(page){
+						this.unitList(page.currentPage,page.pageSize,this.unitName,this.custName,this.tel);
+						setTimeout(function(){
+							//分页查询信息
+							callback({
+							  total:self.page.total,
+							  data: self.kehuArr
+							})		
+						},1000)
+
+					}
+			},
+				
             openDetails(unit,name,phone){
                 this.form.clientName = name;
                 this.form.clientPhone = phone;
@@ -587,26 +536,39 @@
             },
             //提交完成
             sunTj(){
-                var self = this;
+                var self = this;	
                 self.formTj.userId = this.obj.id;
                 self.formTj.picurls = this.imgArr;
+				if(self.isComplete){
+					self.isComplete = false;
+					let dataArr = request({
+						url:domainUrl + '/submit',
+						data:self.formTj,
+						method:'POST'
+					})
+					dataArr.then(res => {
+						if(res.data.success){
+							this.isFz = true;
+							self.isComplete = true;
+							let obj = {
+								url:"http://lingaokeji.top:8098?id=496",
+								//url:"http://lingaokeji.top:8098?id="+self.formTj.id,
+								tel:self.form.clientPhone
+							}
+							let weixin = request({
+								url:domainUrl + '/sendMsgToCust',
+								data:obj,
+								method:'POST'
+							})
+							weixin.then(ress => {
+								let sing = "尊敬的客户，您所提交的问题已经处理完了，请您用浏览器打开下面的链接进行评价，谢谢！"
+								self.sysAppIds = sing + "http://lingaokeji.top:8098?id="+self.formTj.id;
+								this.qingkongTj();
+							})
 
-                let dataArr = request({
-                    url:domainUrl + '/submit',
-                    data:self.formTj,
-                    method:'POST'
-                })
-                dataArr.then(res => {
-                    if(res.data.success){
-                        this.isFz = true;
-                        let copy = "&sex="+ self.form.sex + "&clientName=" + self.form.clientName + "&clientPhone="+ self.form.clientPhone +
-                            "&clientUnit="+ self.form.clientUnit + "&description=" + self.form.description + "&picurl="+self.form.preview +
-                            "&title="+ self.form.title + "&userId=" + self.formTj.userId + "&tdId=" + self.formTj.id + "&beginTime=" + res.data.beginTime
-                            + "&endTime=" + res.data.endTime + "&hour="+res.data.hour + "&min=" + res.data.min;
-                        self.sysAppIds = "http://lingaokeji.top:8067?"+copy;
-                        this.qingkongTj();
-                    }
-                })
+						}
+					})	
+				}
             },
             //选择紧急情况
             toJinji(){
@@ -767,6 +729,18 @@
 </script>
 
 <style scoped>
+	.iconcategory{
+		position: absolute;
+		top: 3px;
+		right: 15px;
+	}
+	.avue-input-table{
+		width: 20px;
+		height: 20px;
+		position: absolute;
+		top: 0;
+		right: 25px;
+	}
     .conLeft{
         width: 20%;
         position: absolute;
@@ -790,32 +764,12 @@
         cursor: pointer;
         padding-left: 10px;
     }
-    /*.table >>> .cell{*/
-        /*font-size: 16px;*/
-        /*height: 38px;*/
-        /*line-height: 38px;*/
-        /*cursor: pointer;*/
-
-    /*}*/
-    /*.table >>> .is-leaf{*/
-        /*text-align: center;*/
-        /*font-size: 16px;*/
-        /*font-weight: 400;*/
-        /*padding: 0;*/
-        /*color: #1f94f4;*/
-        /*display: none;*/
-    /*}*/
-    /*.table >>> .el-table td, .el-table th{*/
-        /*padding: 0;*/
-    /*}*/
-
-
     .h3{
-
         color: #666;
     }
     .list-input{
         line-height: 35px;
+		position: relative;
     }
     .list-input .list-left{
         width: 19%;

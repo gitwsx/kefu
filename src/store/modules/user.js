@@ -152,46 +152,372 @@ const user = {
     //获取系统菜单
 
     GetMenu ({ commit }, parentId) {
-        // return new Promise(resolve => {
-        //     getMenu(parentId).then((res) => {
-        //         const data = res.data.data;
-        //         let menu = deepClone(data);
-        //         menu.forEach(ele => {
-        //             addPath(ele, true);
-        //         })
-        //         commit('SET_MENU', menu)
-        //         resolve(menu)
-        //     })
-        // })
-      let name = "";
-        if(Cookie.get('token') != undefined){
-            const obj = JSON.parse(Cookie.get('token'))
-            useranme = obj.name;
-        }
-      return new Promise(resolve => {
-          getMenu(parentId).then((res) => {
-              let login = request({
-                  url:domainUrl + '/getMenu?uname=' + useranme,
-                  method:'get'
-              })
-              login.then(ress => {
-                  const data = ress.data.datas;
-                  let menu = deepClone(data);
-                  menu.forEach(ele => {
-                      addPath(ele, true);
-                  })
-                  commit('SET_MENU', menu)
-                  resolve(menu)
-              })
-              //const data = res.data.data;
+		let name = "";
+		let obj = {}
+		let arr = [];
+		  if(Cookie.get('token') != undefined){
+		      obj = JSON.parse(Cookie.get('token'))
+				//console.log(obj,222222222222222)
+		      useranme = obj.name;
+		  }
+		  //roleid  1表示 管理员， 2  表示 员工  3 表示 客户
+		  if(obj.roleid == 1){
+			arr = [
+				 {
+					label:"工单系统",
+					path:"/workOrdeSystem",
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children: [],
+							component: "views/jstkingdee/history",
+							icon: "iconfont iconcategory",
+							label: "未完成工单",
+							path: "/history"
+						},
+						{
+							label:'已完成工单',
+							path:'/workOrder',
+							component:'views/jstkingdee/workOrder',
+							icon:'iconfont iconcategory',
+							children:[]
+						},
+						{
+							label: '工单信息',
+							path: '/addWork',
+							component:  'views/jstkingdee/addWork',
+							icon: "iconfont iconcategory",
+							id: 2,
+							children: [],
+						},
+					]
+				},
+				{
+					label:"计划系统",
+					path:"/weeklyPlanningSystem",
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children:[],
+							component:"views/jstkingdee/weeklyPlan",
+							icon:"iconfont iconcategory",
+							id:15,
+							label:"周计划",
+							path:"/weeklyPlan"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/addWeeklyPlan",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"周计划信息",
+							path:"/addWeeklyPlan"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/projectPlanList",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"项目计划",
+							path:"/projectPlanList"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/addProjectPlan",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"项目信息",
+							path:"/addProjectPlan"
+						}
+					]
+				},
+				{
+					label:'日程管理',
+					path:'/scheduleProject',
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children:[],
+							component:"views/jstkingdee/schedule",
+							icon:"iconfont iconcategory",
+							id:15,
+							label:"日程",
+							path:"/schedule"
+						},
+					]
+				},
+				{
+					label:"客户信息",
+					path:"/clientSystem",
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children:[],
+							component:"views/jstkingdee/warehouse",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"客户账号管理",
+							path:"/clientAccount"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/customer",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"客户公众号信息",
+							path:"/customer"
+						},
+					]
+				},
+				{
+					label:"系统设置",
+					path:"/system",
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children:[],
+							component:"views/jstkingdee/account",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"账号管理",
+							path:"/account"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/projectList",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"项目管理",
+							path:"/projectList"
+						}
+					]
+				},
+				{
+					label:"需求系统",
+					path:"/demandSystem",
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children:[],
+							component:"views/jstkingdee/demandList",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"需求列表",
+							path:"/demandList"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/demand",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"需求信息",
+							path:"/demand"
+						},
+					]
+				}
+			 ]  
+		  }else if(obj.roleid == 2){
+			  arr = [
+				  {
+				  	label:"工单系统",
+				  	path:"/workOrdeSystem",
+				  	icon:'iconfont iconcategory',
+				  	children:[
+				  		{
+				  			children: [],
+				  			component: "views/jstkingdee/history",
+				  			icon: "iconfont iconcategory",
+				  			label: "未完成工单",
+				  			path: "/history"
+				  		},
+				  		{
+				  			label:'已完成工单',
+				  			path:'/workOrder',
+				  			component:'views/jstkingdee/workOrder',
+				  			icon:'iconfont iconcategory',
+				  			children:[]
+				  		},
+				  		{
+				  			label: '工单信息',
+				  			path: '/addWork',
+				  			component:  'views/jstkingdee/addWork',
+				  			icon: "iconfont iconcategory",
+				  			id: 2,
+				  			children: [],
+				  		},
+				  	]
+				  },
+				  {
+				  	label:"计划系统",
+				  	path:"/weeklyPlanningSystem",
+				  	icon:'iconfont iconcategory',
+				  	children:[
+				  		{
+				  			children:[],
+				  			component:"views/jstkingdee/weeklyPlan",
+				  			icon:"iconfont iconcategory",
+				  			id:15,
+				  			label:"周计划",
+				  			path:"/weeklyPlan"
+				  		},
+				  		{
+				  			children:[],
+				  			component:"views/jstkingdee/addWeeklyPlan",
+				  			icon:"iconfont iconcategory",
+				  			id:16,
+				  			label:"周计划信息",
+				  			path:"/addWeeklyPlan"
+				  		},
+						{
+							children:[],
+							component:"views/jstkingdee/projectPlanList",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"项目计划",
+							path:"/projectPlanList"
+						},
+						{
+							children:[],
+							component:"views/jstkingdee/addProjectPlan",
+							icon:"iconfont iconcategory",
+							id:16,
+							label:"项目信息",
+							path:"/addProjectPlan"
+						}
+				  	]
+				  },
+				  {
+				  	label:'日程管理',
+				  	path:'/scheduleProject',
+				  	icon:'iconfont iconcategory',
+				  	children:[
+				  		{
+				  			children:[],
+				  			component:"views/jstkingdee/schedule",
+				  			icon:"iconfont iconcategory",
+				  			id:15,
+				  			label:"日程",
+				  			path:"/schedule"
+				  		},
+				  	]
+				  },
+				  {
+				  	label:"客户信息",
+				  	path:"/clientSystem",
+				  	icon:'iconfont iconcategory',
+				  	children:[
+				  		{
+				  			children:[],
+				  			component:"views/jstkingdee/customer",
+				  			icon:"iconfont iconcategory",
+				  			id:16,
+				  			label:"客户公众号信息",
+				  			path:"/customer"
+				  		},
+				  	]
+				  },
+				  {
+				  	label:"系统设置",
+				  	path:"/system",
+				  	icon:'iconfont iconcategory',
+				  	children:[
+				  		{
+				  			children:[],
+				  			component:"views/jstkingdee/projectList",
+				  			icon:"iconfont iconcategory",
+				  			id:16,
+				  			label:"项目管理",
+				  			path:"/projectList"
+				  		}
+				  	]
+				  },
+			  ]
+		  }else if(obj.roleid == 3){
+			  arr = [
+				{
+					label:"工单系统",
+					path:"/workOrdeSystem",
+					icon:'iconfont iconcategory',
+					children:[
+						{
+							children: [],
+							component: "views/jstkingdee/history",
+							icon: "iconfont iconcategory",
+							label: "未完成工单",
+							path: "/history"
+						},
+						{
+							label:'已完成工单',
+							path:'/workOrder',
+							component:'views/jstkingdee/workOrder',
+							icon:'iconfont iconcategory',
+							children:[]
+						},
+						{
+							label: '工单信息',
+							path: '/addWork',
+							component:  'views/jstkingdee/addWork',
+							icon: "iconfont iconcategory",
+							id: 2,
+							children: [],
+						},
+					]
+				},
+				  {
+				  	label:'日程管理',
+				  	path:'/scheduleProject',
+				  	icon:'iconfont iconcategory',
+				  	children:[
+				  		{
+				  			children:[],
+				  			component:"views/jstkingdee/schedule",
+				  			icon:"iconfont iconcategory",
+				  			id:15,
+				  			label:"日程",
+				  			path:"/schedule"
+				  		},
+				  	]
+				  },
+			  ]
+		  }
 
 
-          })
-          getUserInfo().then((res) =>{
-           name = res.data.data.userInfo.username;
-          })
+        return new Promise(resolve => {
+            getMenu(parentId).then((res) => {
+				const data = arr;
+                //const data = res.data.data;
+                let menu = deepClone(data);
+                menu.forEach(ele => {
+                    addPath(ele, true);
+                })
+                commit('SET_MENU', menu)
+                resolve(menu)
+            })
+        })
+  //     return new Promise(resolve => {
+  //         getMenu(parentId).then((res) => {
+  //             let login = request({
+  //                 url:domainUrl + '/getMenu?uname=' + useranme,
+  //                 method:'get'
+  //             })
+  //             login.then(ress => {
+		
+  //                 const data = ress.data.datas;
+		// 		  //console.log(data,222222222222)
+  //                 let menu = deepClone(data);
+  //                 menu.forEach(ele => {
+  //                     addPath(ele, true);
+  //                 })
+  //                 commit('SET_MENU', menu)
+  //                 resolve(menu)
+  //             })
+  //             //const data = res.data.data;
+  //         })
+  //         getUserInfo().then((res) =>{
+  //          name = res.data.data.userInfo.username;
+  //         })
 
-      })
+  //     })
     },
   },
   mutations: {

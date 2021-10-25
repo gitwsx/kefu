@@ -337,7 +337,7 @@
                     this.$message.error("请选择需一条的数据!");
                 }else {
                     if(self.formTj.id != 0 || self.formTj.id != ""){
-                        this.$router.push({ path: '/addWork',query: { userId: 2,id:self.formTj.id }});
+                        this.$router.push({ path: '/workOrdeSystem//addWork',query: { userId: 2,id:self.formTj.id }});
                     }else {
                         this.$message.error("请选择需要提交完成的数据!");
                     }
@@ -426,7 +426,7 @@
                     this.$message.error("请选择需一条的数据!");
                 }else {
                     if(this.formTj.id != 0 || this.formTj.id != ""){
-                        this.$router.push({ path: '/addWork',query: { userId: 3,id:this.formTj.id }});
+                        this.$router.push({ path: '/workOrdeSystem//addWork',query: { userId: 3,id:this.formTj.id }});
                     }else {
                         this.$message.error("请选择需要提交完成的数据!");
                     }
