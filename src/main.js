@@ -22,6 +22,13 @@ import basicContainer from './components/basic-container/main'
 import model from './public';
 Vue.prototype.model = model;
 
+// 添加vxe-table
+import 'xe-utils'
+import VXETable from 'vxe-table'
+import 'vxe-table/lib/style.css'
+
+Vue.use(VXETable)
+
 //import Avue from '@smallwei/avue';
 //import '@smallwei/avue/lib/index.css';
 //Vue.use(Avue);

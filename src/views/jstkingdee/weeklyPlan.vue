@@ -485,11 +485,18 @@
 									execute:sublist[j].execute,
 									finish:sublist[j].finish,
 									percentage:sublist[j].percentage,
+									title:sublist[j].title
 								}
 								this.data.push(obj);
 							}
 						}
 					}
+					for(var i = 0;i<this.data.length;i++){
+						if(this.data[i].content == ""){
+							this.data[i].content = this.data[i].title;
+						}
+					}
+	
 					self.rowspan();	
 					this.page.total = res.data.total;
 					this.page.pageSize = res.data.pageSize;

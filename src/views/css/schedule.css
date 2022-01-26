@@ -1,0 +1,86 @@
+.divMouse{
+	position: fixed;
+	width: 300px;
+	height: 280px;
+	background: rgba(0,0,0,0.5);
+	border-radius: 10px;
+	z-index: 9999999;
+}
+
+/* 日程待办 */
+.topList{
+	height: 35px;
+	line-height: 35px;
+	border-bottom: 1px solid #ddd;
+	padding-left: 30px;
+}
+.topList div{
+	float: left;
+	width: 60px;
+	cursor: pointer;
+	text-align: center;
+	border-radius: 5px;
+}
+.isIndex{
+	background: #ddd;
+	font-weight: 600;
+}
+.daiban{
+	height: 630px;
+	overflow: auto;
+}
+
+	.daiban-top{
+		position: relative;
+	}
+	.el-icon-bell{
+		position: absolute;
+		top: 28px;
+		right: 40px;
+		font-size: 24px;
+		color: #999;
+		cursor: pointer;
+	}
+	.el-icon-user{
+		position: absolute;
+		top: 28px;
+		right: 12px;
+		font-size: 24px;
+		color: #999;
+		cursor: pointer;
+	}
+	.daiban-list{
+		height: 45px;
+	}
+	.daiban-list-top{
+		height: 25px;
+		line-height: 25px;
+		font-size: 18px;
+		overflow:hidden;
+		text-overflow:ellipsis;
+		white-space:nowrap;
+	}
+	.daiban-list-bom{
+		font-size: 10px;
+		color: #999;
+	}
+	.daiban-list-bom-time{
+		width: 130px;
+		float: left;
+	}
+	.daiban-list-bom-laiyuan{
+		width: 200px;
+		float: left;
+		overflow:hidden;
+		text-overflow:ellipsis;
+		white-space:nowrap;
+	}
+	.daibanTc{
+		position: fixed;
+		width: 60px;
+		height: 80px;
+		border: 1px solid #ddd;
+		background-color: #fff;
+		z-index: 9999;
+	}
+	

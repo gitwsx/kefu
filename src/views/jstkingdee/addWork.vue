@@ -513,7 +513,10 @@
                                 this.isKg = true;
                                 this.qingkong();
                                 this.$message.success("提交成功!");
-                            }
+                            }else{
+								this.$message.success(res.data.msg);
+								 this.isKg = true;
+							}
                         })
                     }else {
                         this.form.id = this.formTj.id;
@@ -527,7 +530,10 @@
                                 this.isKg = true;
                                 this.qingkong();
                                 this.$message.success("修改成功!");
-                            }
+                            }else{
+								this.$message.success(res.data.msg);
+								 this.isKg = true;
+							}
                         })
                     }
                 }
@@ -551,7 +557,7 @@
 							this.isFz = true;
 							self.isComplete = true;
 							let obj = {
-								url:"http://lingaokeji.top:8098?id=496",
+								url:"http://122.112.200.226:8071?id=496",
 								//url:"http://lingaokeji.top:8098?id="+self.formTj.id,
 								tel:self.form.clientPhone
 							}
@@ -562,7 +568,7 @@
 							})
 							weixin.then(ress => {
 								let sing = "尊敬的客户，您所提交的问题已经处理完了，请您用浏览器打开下面的链接进行评价，谢谢！"
-								self.sysAppIds = sing + "http://lingaokeji.top:8098?id="+self.formTj.id;
+								self.sysAppIds = sing + "http://122.112.200.226:8071?id="+self.formTj.id;
 								this.qingkongTj();
 							})
 
@@ -696,7 +702,7 @@
                 // 如果需要预览，可以执行下面代码
                 const reader = new FileReader();
                 reader.onload = event => {
-                    console.log(this.isImg,11111111111111111)
+                    //console.log(this.isImg,11111111111111111)
                     this.isImg = false;
                     this.preview = event.target.result;
                     //this.formTj.picurl = event.target.result;

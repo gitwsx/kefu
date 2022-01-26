@@ -24,21 +24,17 @@
         <div style="height:100%;overflow-y:auto;overflow-x:hidden;"
              id="avue-view"
              v-show="!isSearch">
-          <keep-alive>
+			 
+        <keep-alive>
             <router-view class="avue-view"
                          v-if="$route.meta.$keepAlive" />
           </keep-alive>
           <router-view class="avue-view"
                        v-if="!$route.meta.$keepAlive" />
+				   
         </div>
       </div>
     </div>
-    <!-- <el-footer class="avue-footer">
-      <img src="/svg/logo.svg"
-           alt=""
-           class="logo">
-      <p class="copyright">© 2018 Avue designed by smallwei</p>
-    </el-footer> -->
     <div class="avue-shade"
          @click="showCollapse"></div>
   </div>
@@ -82,7 +78,7 @@
 	  </div>
 	  <!-- 内容 -->
 	  <div class="rqCon">
-		  <div class="rqCon-top">今天 · 10月22日 周五</div>
+		  <div class="rqCon-top">今天 · {{curDate}} {{curXingqi}}</div>
 		  <div class="rqList" @click="clickAdd">新增日程...</div>
 	  </div>
 	  
@@ -117,7 +113,10 @@
 				<div class="begTime-text" style="width: 60px;">
 					项目名称
 				</div>
-				<avue-select v-model="form.project" placeholder="请选择项目名称" :dic="projectArr"></avue-select>
+				<div id="trigger">
+				
+				</div>
+				<!-- <avue-select v-model="form.project" placeholder="请选择项目名称" :dic="projectArr"></avue-select> -->
 			</div>
 			<div class="participant">
 				<div class="begTime-text" style="width: 60px;">
@@ -142,6 +141,7 @@
 			</div>
 		</div>
 	  </el-dialog>
+	  
   </div>
   
   
@@ -158,6 +158,13 @@ import admin from "@/util/admin";
 import { validatenull } from "@/util/validate";
 import { calcDate } from "@/util/date.js";
 import { getStore } from "@/util/store.js";
+
+import request from '@/router/axios';
+import { domainUrl } from '@/config/env';
+import {url} from '@/config/env';
+
+
+
 export default {
   components: {
     top,
@@ -165,6 +172,7 @@ export default {
     search,
     sidebar,
     screenshot
+
   },
   name: "index",
   provide () {
@@ -180,14 +188,15 @@ export default {
       refreshLock: false,
       //刷新token的时间
       refreshTime: "",
-	  isFag:true,
+	  isFag:true, //判断是否移动端
 	  year: null,
 	  month: null,
-	  day: null,
+	  //day: null,
 	  currentDay: null,
 	  currentYearMonthTimes: null,//当前年的月的天数
 	  monthOneDay: null,//一个月中的某一天
-	  curDate: null,
+	  curDate: null, //当天的日期
+	  curXingqi:null,
 	  prevDays: null,//上一月天数
 	  getArr:[], //日期
 	  timeArr:[], //时间
@@ -195,14 +204,114 @@ export default {
 	  form:{
 		  
 	  },
-	  dicParticipant:[{label:"wang",value:1}], //参与人
+	  dicParticipant:[], //参与人
+	  projectArr:[], //项目
+	  modeArr:[{value:"现场",label:"现场"},{value:"文档",label:"文档"},{value:"远程",label:"远程"},{value:"公司",label:"公司"},{value:"培训",label:"培训"}],
+	  
+		page: {
+		    total: 0,
+		    pageSize:20,
+		    //pageSizes:[10,15,20]
+		},
+		data:[],
+		option: {
+		    highlightCurrentRow:true,
+		    addBtn:false, //显示新增按钮
+		    delBtn:false, //行内删除
+		    editBtn:false, //行内编辑
+		    viewBtn:false, //行内查看
+		    columnBtn:false, //显示隐藏按钮
+		    refreshBtn:false, //显示刷新按钮
+		    index:true,
+		    indexLabel:'序号',
+		    border:true,
+		    stripe: false,  //斑马纹
+		    labelWidth:170, //弹出表单的label宽度
+		    menu:false,  //是否显示操作菜单栏
+		    //selection: true, //多选
+		    column: [
+		        {
+		            label: "姓名",
+		            prop: "last_name",
+		            row: true,
+		            width:80,
+		            span:16
+		        },
+		        {
+		            sortable:true,
+		            label: "签到",
+		            prop: "companyTime",
+		            row: true,
+		            width:130,
+		            overHidden: true,
+		            span:16
+		        },
+				{
+				    sortable:true,
+				    label: "签退",
+				    prop: "outTime",
+				    row: true,
+				    width:130,
+				    overHidden: true,
+				    span:16
+				},
+		        {
+		            sortable:true,
+		            label: "客户拜访签到时间和客户名称",
+		            prop: "customerTime",
+		            row: true,
+		            width:250,
+		            overHidden: true,
+		            span:16
+		        },
+		        {
+		            sortable:true,
+		            label: "现场实施记录单",
+		            prop: "zdrmz",
+		            row: true,
+		            overHidden: true,
+		            width:150,
+		            span:16
+		        },
+		        {
+		            sortable:true,
+		            label: "计划",
+		            prop: "plan",
+		            row: true,
+		            overHidden: true,
+		            // width:130,
+		            span:16
+		        },
+		        {
+		            sortable:true,
+		            label: "汇报",
+		            prop: "report",
+		            row: true,
+		            overHidden: true,
+		            // width:130,
+		            span:16
+		        },
+		        
+		    ]
+		},
+		obj:{},//获取用户名信息
+		begTime:"",
+		endTime:"",
+		formUser:[],
+		isUser:false, //弹窗
+		dicType:[],
+		
     };
   },
   created () {
+	  
+	  this.obj = JSON.parse(this.$cookie.get("token"));
+	  //console.log(meta.$keepAlive,11111111111111111)
+	  this.watermark({text:this.obj.realname});
     //实时检测刷新token
     this.refreshToken();
 	let width = document.body.clientWidth;
-	console.log(width,11111111111)
+	
 	if(width < 800){
 		this.isFag = false;
 	}else{
@@ -211,9 +320,26 @@ export default {
 	this.getInitDate();
 	this.currentYearMonthTimes = this.mGetDate(this.year, this.month); //本月天数
 	this.prevDays = this.mGetDate(this.year, this.month - 1);
-	this.curDate = `${this.year}-${this.month}-${this.day}`;
+	this.curDate = `${this.month}月${this.day}日`;
+	let curXingqi = new Date().getDay()
+	//console.log(this.curDate,curXingqi)
+	if(curXingqi == 1){
+		this.curXingqi = "周一";
+	}else if(curXingqi == 2){
+		this.curXingqi = "周二";
+	}else if(curXingqi == 3){
+		this.curXingqi = "周三";
+	}else if(curXingqi == 4){
+		this.curXingqi = "周四";
+	}else if(curXingqi == 5){
+		this.curXingqi = "周五";
+	}else if(curXingqi == 6){
+		this.curXingqi = "周六";
+	}else if(curXingqi == 7){
+		this.curXingqi = "周日";
+	}
 	let sun = 0;
-	sun = new Date(this.year, this.month - 1, 1).getDay();;
+	sun = new Date(this.year, this.month - 1, 1).getDay();
 	for(var i = 1;i<43;i++){
 		let obj = {
 			id:i-sun,
@@ -228,6 +354,20 @@ export default {
 	  }
 	  this.timeArr.push(obj);
 	}
+	// var now = new Date();
+	// let y = now.getFullYear();
+	// let m = now.getMonth()+1;
+	// let d = now.getDate();
+	// let beg = now.getTime() + 1*24*60*60*1000; //后一天
+	// let date = new Date(beg);
+	// var year = date.getFullYear();
+	// var month = date.getMonth()+1;
+	// var day = date.getDate(); 
+	// this.begTime = y + "-" + (m < 10 ? ('0' + m) : m) + "-" + (d < 10 ? ('0' + d) : d);
+	// this.endTime = year + "-" + (month < 10 ? ('0' + month) : month) + "-" + (day < 10 ? ('0' + day) : day);
+	
+	this.getXlk();
+	//this.getList();
   },
   computed:{
 	  ...mapGetters(["isMenu", "isLock", "isCollapse", "website", "menu"]),
@@ -242,10 +382,128 @@ export default {
   },
   mounted () {
     this.init();
+	
   },
   //computed: mapGetters(["isMenu", "isLock", "isCollapse", "website", "menu"]),
   props: [],
   methods: {
+	  onLoad(page){
+	      this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
+	  },
+	  getList(page,pageSize,begTime,endTime,userId,userids ){
+		  let obj = {
+			  pageNum:page,
+			  pageSize:pageSize,
+			  begTime:begTime,
+			  endTime:endTime,
+			  userId:userId,
+			  userids:userids
+		  }
+		  let dataArr = request({
+		      url:domainUrl + '/getSignins',
+		      data:obj,
+		      method:'POST'
+		  })
+		  dataArr.then(res => {
+		      this.page.total = res.data.total;
+		      this.page.pageSize = res.data.pageSize;
+		      this.data = res.data.list;
+			  for(var i = 0;i<this.data.length;i++){
+				  if(this.data[i].type == "company"){
+				  	 this.data[i].companyTime =  this.data[i].createdtime;
+				    }
+				  if(this.data[i].type == "customer"){
+				  	  this.data[i].customerTime =  this.data[i].createdtime+"</br>"+this.data[i].entityname;
+					  this.data[i].flag = 0;
+				    } 
+				  if(this.data[i].signinType == "签退"){
+					 if(this.data[i].type == "company"){
+				  	 this.data[i].outTime =  this.data[i].createdtime;
+					}
+				    // if(this.data[i].type == "customer"){
+				  	 //  this.data[i].customerTime =  this.data[i].createdtime+"</br>"+this.data[i].entityname;
+				    // }   
+				  }
+
+
+			  }
+		  })
+	  },
+	  //行单元格的样式
+	  cellStyle({row,column,rowIndex}){
+	      if(row.flag == 1){
+	          return {
+	              backgroundColor:'yellow',
+	              color:'#333'
+	          }
+	      }else if(row.flag == 2){
+	          return {
+	              backgroundColor:'red',
+	              color:'#333'
+	          }
+	      }
+	  },
+	  toUser(){
+	      this.isUser = false;
+	  },
+	  //角色查询
+	  userQd(){
+	      this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
+	      this.isUser = false;
+	  },
+	  userAdd(){
+	      this.isUser = true;
+	      this.formUser = [];
+	  },
+	  //查询
+	  submitcx(){
+	      this.getList(this.page.currentPage,this.page.pageSize,this.begTime,this.endTime,this.obj.id,this.formUser)
+	  },
+	  error(){
+	      this.begTime = "";
+	      this.endTime = "";
+		  this.formUser = [];
+	  },
+	      close() {
+	        this.show = false
+	      },
+	      confirmFn(val) {
+	        this.show = false
+	        this.defaultData = [val.select1]
+	      },
+	      toShow() {
+	        this.show = true
+	      },
+	  //获取下拉框的数据
+	  getXlk(){
+		  let dataArr = request({
+		      url:domainUrl+ '/findUsers',
+		      method:'GET',
+		      header: { 'content-Type': 'application/json' },
+		  })
+		  dataArr.then(res => {
+		      this.dicParticipant = res.data;
+			  this.dicType = res.data;
+		  })
+		  
+		  let dataArr1 = request({
+		      url:domainUrl + '/queryAllPro',
+		      method:'GET'
+		  })
+		  dataArr1.then(res => {
+		  	this.projectArr = [];
+		  	for(var i = 0;i<res.data.list.length;i++){
+		  		let obj = {
+		  			label:res.data.list[i].proName,
+		  			value:res.data.list[i].id,
+		  			custId:res.data.list[i].custId,
+		  			custUnit:res.data.list[i].custUnit
+		  		}
+		  		this.projectArr.push(obj)
+		  	}
+		  
+		  })
+	  },
 	  //点击新增日程
 	  clickAdd(){
 		  this.statusOpen = true;
@@ -315,18 +573,31 @@ export default {
         }
       }, 1000);
     },
-	handleClickDay(day){ //点击这一天，绑定点击事件
-		// console.log( '形参传进来的',day)
-		// console.log( 'data里面的this.day',this.day)
-		// console.log( 'data里面的currentYearMonthTimes',this.currentYearMonthTimes)
-		this.day = day
-		if(this.day > this.currentYearMonthTimes){
+	//点击这一天，绑定点击事件
+	handleClickDay(day){ 
+		if(day > this.currentYearMonthTimes){
 		  this.$message.warning('不能选择超出本月的日期');
 		}
-		console.log(day)
-		let d = this.year + "-" + this.month + "-"+day
-		this.getCommon(d);
-		this.getQuery(this.checks);
+		let d = this.year + "-" + this.month + "-"+day;
+		let date = new Date(d).getDay();
+		this.curDate = this.month + "月"+day+"日";
+		if(date == 1){
+			this.curXingqi = "周一";
+		}else if(date == 2){
+			this.curXingqi = "周二";
+		}else if(date == 3){
+			this.curXingqi = "周三";
+		}else if(date == 4){
+			this.curXingqi = "周四";
+		}else if(date == 5){
+			this.curXingqi = "周五";
+		}else if(date == 6){
+			this.curXingqi = "周六";
+		}else if(date == 7){
+			this.curXingqi = "周日";
+		}
+		// this.getCommon(d);
+		// this.getQuery(this.checks);
 	},
 	computedDay() {
 		const allDay = new Date(this.year, this.month, 0).getDate();
@@ -382,6 +653,13 @@ export default {
   }
 </style>
 <style scoped="scoped">
+	#trigger{
+		width: 258px;
+		height: 38px;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		float: left;
+	}
 	.rqCon{
 		padding: 15px;
 	}
@@ -510,4 +788,6 @@ export default {
 	  .date-header >>> .el-button--primary{
 		  border: none;
 	  }
+	  
+
 </style>

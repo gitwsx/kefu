@@ -160,10 +160,7 @@ export default {
                     this.$refs.loginForm.validate(valid => {
                         if (valid) {	
                             this.$store.dispatch("LoginByUsername", this.loginForm).then(() => {
-								console.log(this.tagWel.value,111111111)
-								///wel/index
                                 this.$router.push({ path: this.tagWel.value});
-								//this.$router.push({ path: '/wel/index'});
                             });
                         }
                     });

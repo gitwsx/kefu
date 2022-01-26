@@ -258,7 +258,9 @@
                 },
 				obj:{},
                
-                name:""
+                name:"",
+				formTj:{},
+				form:{}
             }
         },
         created(){
@@ -290,12 +292,10 @@
             },
 			//选择
             selectionChange(list){
+				console.log(list[0].id,this.formTj.id)
                 if(list.length != 0){
-                    if(list.length>1){
-                    }else {
                         this.formTj.id = list[0].id;
                         this.form.userId = this.obj.id;
-                    }
                 }
             },
             toDelete(){
@@ -434,7 +434,7 @@
 
 <style scoped>
 	.avue-crud >>> .el-table__body-wrapper{
-		height: 380px;
+	/* 	height: 380px; */
 	}
     /*.avue-crud >>> .el-form{*/
         /*height: 450px;*/

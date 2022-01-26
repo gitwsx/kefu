@@ -89,7 +89,29 @@
                             //editDisabled:true,
                             span:16,
                             width:250,
+							rules: [{
+							    required: true,
+							    message: "请输入单位名称",
+							    trigger: "blur"
+							}]
                         },
+						{
+						    sortable:true,
+						    label: "部门",
+						    prop: "department",
+							type:"select",
+							//dicData: [{label:"总经理",value:1},{label:"实施部",value:2},{label:"客服部",value:3},{label:"开发部",value:4},{label:"行政部",value:5}],
+						    dicUrl:domainUrl + "/findDepts",
+							row: true,
+						    //editDisabled:true,
+						    span:16,
+						    width:100,
+							rules: [{
+							    required: true,
+							    message: "请选择部门",
+							    trigger: "blur"
+							}]
+						},
                         {
                             sortable:true,
                             label: "联系方式",
@@ -165,7 +187,8 @@
                     userName:row.userName,
                     unit:row.unit,
                     tel:row.tel,
-                    roleid:row.rolename
+                    roleid:row.rolename,
+					department:row.department
                 }
                 let dataArr = request({
                     url:domainUrl + '/addUser',
@@ -183,10 +206,20 @@
             },
             //编辑
             handleRowUpdate(row,index,done,loading){
+				if(row.rolename == "管理员"){
+					row.rolename = 1;
+				}else if(row.rolename == "员工"){
+					row.rolename = 2;
+				}else if(row.rolename == "客户"){
+					row.rolename = 3;
+				}
                 let obj = {
                     fid:row.fid,
                     roleid:row.rolename,
-                    userid:row.userid
+                    userid:row.userid,
+					department:row.department,
+					unit:row.unit,
+					tel:row.tel,
                 }
                 let dataArr = request({
                     url:domainUrl + '/updateUser',
